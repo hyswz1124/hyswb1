@@ -1,5 +1,5 @@
 <?php
-namespace Home\Controller;
+namespace Api\Controller;
 
 use Think\Controller;
 
@@ -7,6 +7,6 @@ class IndexController extends Controller
 {
     public function index()
     {
-        var_dump(3333);
+        var_dump(222);
     }
 }
