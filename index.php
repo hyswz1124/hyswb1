@@ -29,3 +29,7 @@ require './vendor/autoload.php';
 require './ThinkPHP/ThinkPHP.php';
 
 // 亲^_^ 后面不需要任何代码了 就是如此简单
+define('ADMINIST_CSS', __APP__.'/Public/css/');
+//echo ADMINIST_CSS;exit;
+define('ADMINIST_JS', __APP__.'/Public/css/');
+define('ADMINIST_IMAGES', __APP__.'/Public/css/');
