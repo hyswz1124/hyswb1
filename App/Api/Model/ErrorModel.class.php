@@ -20,7 +20,7 @@ class ErrorModel extends Model {
                 $text = '没有相关的信息';
                 break;
             case 200:
-                $text = '获取成功';
+                $text = '操作成功';
                 break;
             case 300:
                 $text = '缺少参数';
@@ -29,10 +29,10 @@ class ErrorModel extends Model {
                 $text = '参数错误';
                 break;
             case 500:
-                $text = '添加成功';
+                $text = '网络出错,请刷新后再试';
                 break;
             case 600:
-                $text = '添加失败';
+                $text = '操作失败';
                 break;
             default:
                 $text = '网络出错,请刷新后再试';
