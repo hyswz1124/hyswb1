@@ -21,7 +21,7 @@ function api_json($data = array(), $code, $message = '') {
 //短信发送重新书写
 function sender_code($phone,$message) {
 //查找最近发送情况
-    $map="select count(id) AS coun_id from phone_code where  created_at >= current_timestamp - interval '2 minutes'  and phone='{$phone}'";
+    $map="select count(id) AS coun_id from yt_phone_code where  created_at >= current_timestamp - interval '2 minutes'  and phone='{$phone}'";
     $count_code=M()->query($map);
 
     if (intval($count_code['coun_id']) > 0) {
@@ -48,7 +48,7 @@ function sender_code($phone,$message) {
 //获取短信验证码
 function get_code($phone){
     //查找最近发送情况
-    $map="select code from phone_code where  created_at <= current_timestamp - interval '2 minutes'  and phone='{$phone}'";
+    $map="select code from yt_phone_code where  created_at <= current_timestamp - interval '2 minutes'  and phone='{$phone}'";
     $count_code=M()->query($map);
     return $count_code[0]['code'];
 }
