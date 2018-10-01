@@ -45,10 +45,11 @@ class RegisterController extends CommonController
         $data = [
             'mphone'=>$phone,
             'email'=>$email,
-            'password'=>password_hash($passwd, PASSWORD_DEFAULT)
+            'password'=>password_hash($passwd, PASSWORD_DEFAULT),
+            'code'=>$this->initcode()
         ];
         if($invitation_code){
-            $super = M('yt_users')->field('id,one_superId')->where('id=%d and deleted = 0 and status =0',$invitation_code)->find();
+            $super = M('yt_users')->field('id,one_superId')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
             if($super){
                 $data['one_superId'] = $super['id'];
                 $data['two_superId'] = $super['one_superId'];
