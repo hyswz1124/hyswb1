@@ -18,11 +18,13 @@ class LoginController extends CommonController
     }
 
     public function index(){
-        $user = I('user');
-        $pass = I('pwd');
+        $user = I('user', '');
+        $pass = I('pwd', '');
         $where['mphone|email'] = $user;
         $where['password'] = password_hash($pass, PASSWORD_DEFAULT);
-        $data = M('user')->where($where)->find();
+        $where['status'] = 0;
+        $where['deleted'] = 0;
+        $data = M('users')->where($where)->find();
         if(!$data){
             api_json('', 400, '登录失败');
         }
