@@ -106,6 +106,7 @@ class RegisterController extends CommonController
         $captcha= sender_code($phone,$message);
         if($captcha['status'] == 'ok'){
             $code = '200';
+            dd(12);
             echo api_json($captcha['code'],$code,D('Error')->getText($code));exit();
         }else{
             $code = '600';
