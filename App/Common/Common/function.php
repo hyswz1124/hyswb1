@@ -15,7 +15,7 @@ function api_json($data = array(), $code, $message = '') {
         'message' => $message
     );
 
-    return json_encode($return);
+    echo  json_encode($return); exit;
 }
 
 //短信发送重新书写
@@ -72,6 +72,447 @@ function code_source($type){
 
 
 }
+
+
+
+
+
+/**
+ * Request Headers
+ * @param    string $params 获取headers参数
+ * @return    array | string
+ */
+function request_headers($params = '')
+{
+    // If header is already defined, return it immediately
+    /*
+    if (!empty($this->headers)) {
+        return $this->headers;
+    }*/
+
+    // In Apache, you can simply call apache_request_headers()
+    if (function_exists('apache_request_headers')) {
+        //return apache_request_headers();
+    }
+
+    //$this->headers['Content-Type'] = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : @getenv('CONTENT_TYPE');
+    $headers = array();
+    if (!empty($params)) {
+        $key = 'HTTP_' . strtoupper(str_replace('-', '_', strtolower($params)));
+        return $_SERVER[$key];
+    }
+    foreach ($_SERVER as $key => $val) {
+        if (sscanf($key, 'HTTP_%s', $header) === 1) {
+            // take SOME_HEADER and turn it into Some-Header
+            $header = str_replace('_', ' ', strtolower($header));
+            $header = str_replace(' ', '-', ucwords($header));
+
+            $headers[$header] = $val;
+            //$this->headers[$header] = $this->_fetch_from_array($_SERVER, $key, $xss_clean);
+        }
+    }
+
+    return $headers;
+}
+
+/**
+ * Gets the value of an environment variable. Supports boolean, empty and null.
+ *
+ * @param  string $key
+ * @param  string $default
+ * @return mixed
+ */
+function env($key, $default = '')
+{
+    $value = getenv($key);
+
+    if ($value === false) {
+        return $default;
+    }
+
+    switch (strtolower($value)) {
+        case 'true':
+        case '(true)':
+            return true;
+        case 'false':
+        case '(false)':
+            return false;
+        case 'empty':
+        case '(empty)':
+            return '';
+        case 'null':
+        case '(null)':
+            return;
+    }
+    if (strlen($value) > 1) {
+        $value = trim($value, '"');
+    }
+
+    return $value;
+}
+
+/**
+ * 前端用户密码hash
+ * @param string $password
+ * @param string $halt
+ * @return string
+ */
+function hash_password($password, $halt = '')
+{
+    return sha1('tos_' . $password . '_' . $halt);
+}
+
+/*
+ * 生成4位数字短信验证码
+ * @return string
+ */
+function generate_m_code()
+{
+    list($s1, $s2) = explode(' ', microtime());
+    return substr($s1, 2, 4);
+}
+
+/**
+ * 用生日计算年龄
+ * @param $birthday
+ * @return int
+ */
+function birthday($birthday)
+{
+    $age = strtotime($birthday);
+    if ($age === false) {
+        return 0;
+    }
+    list($y1, $m1, $d1) = explode("-", date("Y-m-d", $age));
+    $now = strtotime("now");
+    list($y2, $m2, $d2) = explode("-", date("Y-m-d", $now));
+    $age = $y2 - $y1;
+    if ((int)($m2 . $d2) < (int)($m1 . $d1)) {
+        $age -= 1;
+    }
+    return $age;
+}
+
+/**
+ * 判断时间格式是否正确
+ * @param string $param  输入的时间
+ * @param string $format 指定的时间格式
+ * @return boolean
+ */
+function is_datetime($param = '', $format = 'Y-m-d H:i:s')
+{
+    return date($format, strtotime($param)) === $param;
+}
+
+/**
+ * 从二维数组中获取某个键值,并返回其数组
+ * @param array  $array =array(
+ *                      array($key => '',)
+ *                      array($key => '',)
+ *                      array($key => '',)
+ *                      )
+ * @param string $key
+ * @return array|bool
+ */
+function get_array_value_to_array($array, $key)
+{
+    if (!is_array($array)) {
+        return false;
+    }
+    $result = array();
+    foreach ($array as $item) {
+        if (!is_array($item)) {
+            $item = (array)$item;
+        }
+        $result[] = $item[$key];
+    }
+    return $result;
+}
+
+/**
+ * 从二维数组中获取某个键值,并返回以其为键的关联数组
+ * @param array  $array =array(
+ *                      array($key => '',)
+ *                      array($key => '',)
+ *                      array($key => '',)
+ *                      )
+ * @param string $key
+ * @return array|bool
+ */
+function get_array_value_to_map_array($array, $key)
+{
+    if (!is_array($array)) {
+        return false;
+    }
+    $result = array();
+    foreach ($array as $item) {
+        if (!is_array($item)) {
+            $item = (array)$item;
+        }
+        if (isset($item[$key])) {
+            $result[$item[$key]] = $item;
+        } else {
+            $result[] = $item;
+        }
+    }
+    return $result;
+}
+
+/**
+ * 从二维数组中删除某个键值
+ * @param array  $array =array(
+ *                      array($key => '',)
+ *                      array($key => '',)
+ *                      array($key => '',)
+ *                      )
+ * @param string $key
+ * @return bool
+ */
+function remove_array_value(&$array, $key)
+{
+    if (!is_array($array)) {
+        return false;
+    }
+    foreach ($array as &$item) {
+        if (!is_array($item)) {
+            $item = (array)$item;
+        }
+        if (isset($item[$key])) {
+            unset($item[$key]);
+        }
+        //$result[] = $item[$key];
+    }
+    return true;
+}
+
+/**
+ * 从配置文件取数组得对应值
+ * @param  array(
+ *                      array($key => '',)
+ *                      array($key => '',)
+ *                      array($key => '',)
+ *                      )
+ * @param string $key
+ * @return array|bool
+ */
+function get_config_value_by_key($array_name, $key)
+{
+    $result = C($array_name);
+    if(is_array($result))
+        return  $result[$key];
+    return '';
+}
+
+/**
+ * 显示时间，供模板显示用，时间戳为0，不显示为1970-1-1，显示为''
+ * $format 时间格式,$time 时间戳
+ */
+function show_unix_time($time,$format = 'Y-m-d H:i:s')
+{
+    if(empty($time))
+        return '';
+    return date($format,$time);
+}
+
+/**
+ * 客户端显示时间
+ * @param int $time 时间戳
+ * @return string
+ */
+function client_show_time($time)
+{
+    $diff = time() - (int)$time;
+    if ($diff <= 0) {
+        return '现在';
+    }
+    if ($diff < 60) {
+        return $diff . '秒前';
+    }
+    if ($diff < 3600) {
+        $minutes = (int)($diff / 60);
+        return $minutes . '分钟前';
+    }
+    if ($diff < 3600 * 24) {
+        $hours = (int)($diff / 3600);
+        return $hours . '小时前';
+    }
+    $days = (int)($diff / (3600 * 24));
+    if ($days > 31) {
+        list($y1, $m1, $d1) = explode("-", date("Y-m-d", $time));
+        $now = strtotime("now");
+        list($y2, $m2, $d2) = explode("-", date("Y-m-d", $now));
+        $years = $y2 - $y1;
+        $months = $m2 - $m1;
+        if($years > 0){
+            $months = $m2 - $m1 + 12;
+        }
+        if ((int)($m2 . $d2) < (int)($m1 . $d1)) {
+            $years -= 1;
+        }
+        if ($years > 0) {
+            return $years . '年前';
+        } else {
+            if ($d2 < $d1) {
+                $months -= 1;
+            }
+            return $months . '个月前';
+        }
+    } else {
+        return $days . '天前';
+    }
+
+}
+
+
+/**
+ * plist编码
+ * @param mixed  $data     数据
+ * @param string $root     根节点名
+ * @param string $item     数字索引的子节点名
+ * @param string $attr     根节点属性
+ * @param string $id       数字索引子节点key转换的属性名
+ * @param string $encoding 数据编码
+ * @return string
+ */
+function plist_encode($data, $root = 'array', $item = 'dict', $attr = '', $id = 'id', $encoding = 'utf-8')
+{
+    if (is_array($attr)) {
+        $_attr = array();
+        foreach ($attr as $key => $value) {
+            $_attr[] = "{$key}=\"{$value}\"";
+        }
+        $attr = implode(' ', $_attr);
+    }
+    $attr = trim($attr);
+    $attr = empty($attr) ? '' : " {$attr}";
+    $plist = "<?xml version=\"1.0\" encoding=\"{$encoding}\"?>";
+    $plist .= '<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">';
+    $plist .= '<plist version="1.0">';
+    $plist .= "<{$root}{$attr}>";
+    $plist .= data_to_plist($data, $item);
+    $plist .= "</{$root}>";
+    $plist .= "</plist>";
+    return $plist;
+}
+
+/**
+ * 数据XML编码
+ * @param mixed  $data 数据
+ * @param string $item 数字索引时的节点名称
+ * @param string $id   数字索引key转换为的属性名
+ * @return string
+ */
+function data_to_plist($data, $item = 'dict')
+{
+    $xml = $attr = '';
+    foreach ($data as $key => $val) {
+
+        $xml .= "<{$key}>";
+        $xml .= (is_array($val) || is_object($val)) ? data_to_plist($val, $item) : $val;
+        $xml .= "</{$key}>";
+    }
+    return $xml;
+}
+
+/**
+ * 生成文件名
+ * @param string $origin 原始文件名
+ * @param string $key    前缀
+ * @return string
+ */
+function unique_file_name($origin, $key = 'to')
+{
+    $key = substr(session_id(), 0, 4);
+    $str = pathinfo($origin, PATHINFO_EXTENSION);
+    return uniqid($key) . (empty($str) ? '' : '.') . $str;
+}
+
+/**
+ * 生成订单号
+ * @param string $postfix
+ * @return string
+ */
+function generate_order_no($postfix = '')
+{
+    list($usec, $sec) = explode(" ", microtime());
+    $msec = round($usec * 1000);
+    return date('YmdHis', time()) . $msec . $postfix;
+}
+
+/**
+ * 计算两个经纬度之间的距离
+ * @param float $latitude1
+ * @param float $longitude1
+ * @param float $latitude2
+ * @param float $longitude2
+ * @return float(千米)
+ */
+function get_distance($latitude1, $longitude1, $latitude2, $longitude2)
+{
+    $EARTH_RADIUS = 6371.393;
+    $radLat1 = $latitude1 * M_PI / 180.0;
+    $radLat2 = $latitude2 * M_PI / 180.0;
+    $a = $radLat1 - $radLat2;
+    $b = ($longitude1 * M_PI / 180.0) - ($longitude2 * M_PI / 180.0);
+    $s = 2 * asin(sqrt(pow(sin($a / 2), 2) + cos($radLat1) * cos($radLat2) * pow(sin($b / 2), 2)));
+    $s = $s * $EARTH_RADIUS;
+    return round($s, 3);
+}
+
+/**
+ * 获取当前页面完整URL地址
+ */
+function get_url() {
+    $sys_protocal = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443' ? 'https://' : 'http://';
+    $php_self = $_SERVER['PHP_SELF'] ? $_SERVER['PHP_SELF'] : $_SERVER['SCRIPT_NAME'];
+    $path_info = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
+    $relate_url = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $php_self.(isset($_SERVER['QUERY_STRING']) ? '?'.$_SERVER['QUERY_STRING'] : $path_info);
+    return $sys_protocal.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '').$relate_url;
+}
+
+/*
+ * 随机字符串
+ */
+function createNonceStr($length = 16) {
+    $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    $str = "";
+    for ($i = 0; $i < $length; $i++) {
+        $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+    }
+    return $str;
+}
+
+
+function  encode ( $string  =  '' ,  $skey  =  'hys' ) {
+    if(!$string){
+        return 0;
+    }
+
+    $strArr  =  str_split ( base64_encode ( $string ));
+    $strCount  =  count ( $strArr );
+    foreach ( str_split ( $skey ) as  $key  =>  $value )
+        $key  <  $strCount  &&  $strArr [ $key ].= $value ;
+    return  str_replace (array( '=' ,  '+' ,  '/' ), array( 'O0O0O' ,  'o000o' ,  'oo00o' ),  join ( '' ,  $strArr ));
+}
+
+
+function  decode ( $string  =  '' ,  $skey  =  'hys' )
+{
+    if (!$string) {
+        return $string;
+    }
+    $strArr = str_split(str_replace(array('O0O0O', 'o000o', 'oo00o'), array('=', '+', '/'), $string), 2);
+    $strCount = count($strArr);
+    foreach (str_split($skey) as $key => $value)
+        $key <= $strCount && isset($strArr [$key]) && $strArr [$key][1] === $value && $strArr [$key] = $strArr [$key][0];
+    return base64_decode(join('', $strArr));
+}
+
+function dd($string = ''){
+    var_dump($string);
+    exit;
+}
+
 ?>
 
 
