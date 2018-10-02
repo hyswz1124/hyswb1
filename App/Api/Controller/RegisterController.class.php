@@ -86,7 +86,7 @@ class RegisterController extends CommonController
         if (strlen($passwd) < 6 || strlen($passwd) > 20 || $passwd != $checkpwd) {
             echo api_json(null,'400','密码输入有误');exit();
         }
-        $user = M('users')->where("mphone={$phone} or email={$phone}")->find();
+        $user = M('users')->where("mphone='{$phone}' or email='{$phone}'")->find();
         if(!$user){
             echo api_json(null,'400','手机号未注册');exit();
         }
