@@ -21,12 +21,16 @@ class LoginController extends CommonController
         $user = I('user', '');
         $pass = I('pwd', '');
         $where['mphone|email'] = $user;
-        $where['password'] = password_hash($pass, PASSWORD_DEFAULT);
+//        $where['password'] = password_hash($pass, PASSWORD_DEFAULT);
         $where['status'] = 0;
         $where['deleted'] = 0;
         $data = M('users')->where($where)->find();
         if(!$data){
-            api_json('', 400, '登录失败');
+            api_json('', 400, '用户不存在或者已被禁用');
+        }
+        $row=password_verify($pass,$data['password']);
+        if(!$row){
+            api_json('', 400, '密码错误');
         }
         $token  = $this->inittoken();
         $up['token'] = $token;
