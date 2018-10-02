@@ -76,13 +76,13 @@ class RegisterController extends CommonController
             $code = '300';
             echo api_json(null,$code,D('Error')->getText($code));exit();
         }
-        if(empty($phone_code)){
-            echo api_json(null,'300','手机验证码为空');exit();
-        }
-        $phone_codes = get_code($phone);
-        if(!$phone_codes || ($phone_code != $phone_codes)){
-            echo api_json(null,'400','手机验证码不正确');exit();
-        }
+//        if(empty($phone_code)){
+//            echo api_json(null,'300','手机验证码为空');exit();
+//        }
+//        $phone_codes = get_code($phone);
+//        if(!$phone_codes || ($phone_code != $phone_codes)){
+//            echo api_json(null,'400','手机验证码不正确');exit();
+//        }
         if (strlen($passwd) < 6 || strlen($passwd) > 20 || $passwd != $checkpwd) {
             echo api_json(null,'400','密码输入有误');exit();
         }
@@ -90,7 +90,14 @@ class RegisterController extends CommonController
         if(!$user){
             echo api_json(null,'400','手机号未注册');exit();
         }
-        $result = M('yt_users')->where('id='.$user['id'])->save(['password'=>password_hash($passwd, PASSWORD_DEFAULT)]);
+        $result = M('users')->where('id='.$user['id'])->save(['password'=>password_hash($passwd, PASSWORD_DEFAULT)]);
+        if($result){
+            $code = '200';
+            echo api_json(null,$code,D('Error')->getText($code));exit();
+        }else{
+            $code = '500';
+            echo api_json(null,$code,D('Error')->getText($code));exit();
+        }
     }
 
     /**
