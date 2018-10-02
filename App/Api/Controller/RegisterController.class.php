@@ -21,9 +21,9 @@ class RegisterController extends CommonController
             $code = '300';
            echo api_json(null,$code,D('Error')->getText($code));exit();
         }
-        if(empty($phone_code)){
-            echo api_json(null,'300','手机验证码为空');exit();
-        }
+//        if(empty($phone_code)){
+//            echo api_json(null,'300','手机验证码为空');exit();
+//        }
         //过滤匹配
         if (!preg_match('/1[0-9]{10}/', $phone) || strlen($phone) != 11) {
             echo api_json(null,'400','手机号码格式不正确');exit();
@@ -38,11 +38,12 @@ class RegisterController extends CommonController
         if($user){
             echo api_json(null,'400','手机号或者邮箱已注册');exit();
         }
-       $phone_codes = get_code($phone);
-        if(!$phone_codes || ($phone_code != $phone_codes)){
-            echo api_json(null,'400','手机验证码不正确');exit();
-        }
+//       $phone_codes = get_code($phone);
+//        if(!$phone_codes || ($phone_code != $phone_codes)){
+//            echo api_json(null,'400','手机验证码不正确');exit();
+//        }
         $data = [
+//            'nickname'=>$name,
             'mphone'=>$phone,
             'email'=>$email,
             'password'=>password_hash($passwd, PASSWORD_DEFAULT),
@@ -55,7 +56,7 @@ class RegisterController extends CommonController
                 $data['two_superId'] = $super['one_superId'];
             }
         }
-        $result = M('yt_users')->add($data);
+        $result = M('users')->add($data);
         if(!$result){
             $code = '500';
             echo api_json(null,$code,D('Error')->getText($code));exit();
