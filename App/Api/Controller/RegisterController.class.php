@@ -31,9 +31,9 @@ class RegisterController extends CommonController
         if (strlen($passwd) < 6 || strlen($passwd) > 20 || $passwd != $checkpwd) {
             echo api_json(null,'400','密码输入有误');exit();
         }
-        if (mb_strlen($name, 'UTF8') < 2 || mb_strlen($name, 'UTF8') > 20) {
-            echo api_json(null,'400','用户名长度不符');exit();
-        }
+//        if (mb_strlen($name, 'UTF8') < 2 || mb_strlen($name, 'UTF8') > 20) {
+//            echo api_json(null,'400','用户名长度不符');exit();
+//        }
         $user = M('yt_users')->where("mphone={$phone} or email={$email}")->find();
         if($user){
             echo api_json(null,'400','手机号或者邮箱已注册');exit();
