@@ -34,7 +34,7 @@ class RegisterController extends CommonController
 //        if (mb_strlen($name, 'UTF8') < 2 || mb_strlen($name, 'UTF8') > 20) {
 //            echo api_json(null,'400','用户名长度不符');exit();
 //        }
-        $user = M('users')->where("mphone={$phone} or email={$email}")->find();
+        $user = M('users')->where("mphone='{$phone}' or email='{$email}'")->find();
         if($user){
             echo api_json(null,'400','手机号或者邮箱已注册');exit();
         }
@@ -114,7 +114,6 @@ class RegisterController extends CommonController
         $captcha= sender_code($phone,$message);
         if($captcha['status'] == 'ok'){
             $code = '200';
-            dd(12);
             echo api_json($captcha['code'],$code,D('Error')->getText($code));exit();
         }else{
             $code = '600';
