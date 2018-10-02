@@ -80,7 +80,7 @@ class CommonController extends Controller
     /**
      * 生成邀请码
      */
-    private function initcode() {
+    public function initcode() {
         $code = substr(base_convert(md5(uniqid(md5(microtime(true)),true)), 16, 10), 0, 6);
         return $code;
     }
