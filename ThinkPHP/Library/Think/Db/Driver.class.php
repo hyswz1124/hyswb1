@@ -389,12 +389,13 @@ abstract class Driver
         }
         // 记录错误日志
         trace($this->error, '', 'ERR');
-        if ($this->config['debug']) {
-            // 开启数据库调试模式
-            E($this->error);
-        } else {
-            return $this->error;
-        }
+//        if ($this->config['debug']) {
+//            // 开启数据库调试模式
+//            E($this->error);
+//        } else {
+//            return $this->error;
+//        }
+        return $this->error;
     }
 
     /**
