@@ -10,14 +10,13 @@ class RegisterController extends CommonController
         var_dump(222);
     }
     public function index(){
-        $phone = I('phone');
-        $email = I('emaill');
+        $user = I('user');
         $passwd = I('pwd');
         $phone_code = I('phone_code');
         $checkpwd = I('checkpwd');
         $name = I('name');
         $invitation_code = I('invitation_code');
-        if(empty($phone) || empty($email) || empty($passwd)){
+        if(empty($user) || empty($passwd)){
             $code = '300';
            echo api_json(null,$code,D('Error')->getText($code));exit();
         }
@@ -25,16 +24,23 @@ class RegisterController extends CommonController
 //            echo api_json(null,'300','手机验证码为空');exit();
 //        }
         //过滤匹配
-        if (!preg_match('/1[0-9]{10}/', $phone) || strlen($phone) != 11) {
-            echo api_json(null,'400','手机号码格式不正确');exit();
+        if(!preg_match('/1[0-9]{10}/', $user) || strlen($user) != 11) {
+            if(!preg_match('/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/', $user)){
+                echo api_json(null,'400','手机号码或邮箱格式不正确');exit();
+            }else{
+                $data['email'] = $user;
+            }
+        }else{
+            $data['mphone'] = $user;
         }
-        if (strlen($passwd) < 6 || strlen($passwd) > 20 || $passwd != $checkpwd) {
-            echo api_json(null,'400','密码输入有误');exit();
-        }
+
+//        if (strlen($passwd) < 6 || strlen($passwd) > 20 || $passwd != $checkpwd) {
+//            echo api_json(null,'400','密码输入有误');exit();
+//        }
 //        if (mb_strlen($name, 'UTF8') < 2 || mb_strlen($name, 'UTF8') > 20) {
 //            echo api_json(null,'400','用户名长度不符');exit();
 //        }
-        $user = M('users')->where("mphone='{$phone}' or email='{$email}'")->find();
+        $user = M('users')->where("mphone='{$user}' or email='{$user}'")->find();
         if($user){
             echo api_json(null,'400','手机号或者邮箱已注册');exit();
         }
@@ -42,13 +48,8 @@ class RegisterController extends CommonController
 //        if(!$phone_codes || ($phone_code != $phone_codes)){
 //            echo api_json(null,'400','手机验证码不正确');exit();
 //        }
-        $data = [
-//            'nickname'=>$name,
-            'mphone'=>$phone,
-            'email'=>$email,
-            'password'=>password_hash($passwd, PASSWORD_DEFAULT),
-            'code'=>$this->initcode()
-        ];
+        $data['password'] = password_hash($passwd, PASSWORD_DEFAULT);
+        $data['code'] = $this->initcode();
         if($invitation_code){
             $super = M('users')->field('id,one_superId')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
             if($super){
