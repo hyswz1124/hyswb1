@@ -69,7 +69,7 @@ class RegisterController extends CommonController
      * 找回密码
      */
     public function retrieve_pwd(){
-        $phone = I('phone');
+        $phone = I('user');
         $passwd = I('pwd');
         $phone_code = I('phone_code');
         $checkpwd = I('checkpwd');
