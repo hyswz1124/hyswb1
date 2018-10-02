@@ -50,7 +50,7 @@ class RegisterController extends CommonController
             'code'=>$this->initcode()
         ];
         if($invitation_code){
-            $super = M('yt_users')->field('id,one_superId')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
+            $super = M('users')->field('id,one_superId')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
             if($super){
                 $data['one_superId'] = $super['id'];
                 $data['two_superId'] = $super['one_superId'];
