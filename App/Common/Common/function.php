@@ -19,10 +19,11 @@ function api_json($data = array(), $code, $message = '') {
 }
 
 //短信发送重新书写
-function sender_code($phone,$message) {
+function sender_code($phone,$message)
+{
 //查找最近发送情况
-    $map="select count(id) AS coun_id from yt_phone_code where  created_at >= current_timestamp - interval '2 minutes'  and phone='{$phone}'";
-    $count_code=M()->query($map);
+    $map = "select count(id) AS coun_id from yt_phone_code where  created_at >= current_timestamp - interval '2 minutes'  and phone='{$phone}'";
+    $count_code = M()->query($map);
 
     if (intval($count_code['coun_id']) > 0) {
         return ['status' => 'no', 'data' => '获取验证码间隔不能短于两分钟，如有疑问请联系客服'];
@@ -34,17 +35,18 @@ function sender_code($phone,$message) {
     $xml = simplexml_load_string($content);
 
     if ($xml->code->__toString() === '2') {
-        $status="发送成功";
-        $data=array("message"=>$message,"phone"=>$phone,"code"=>$code,"status"=>$status);
-        $id=M('phone_code')->add($data);
+        $status = "发送成功";
+        $data = array("message" => $message, "phone" => $phone, "code" => $code, "status" => $status);
+        $id = M('phone_code')->add($data);
         return ['status' => 'ok', 'data' => 120, 'code' => $code];
     } else {
-        $status="发送失败";
-        $data=array("message"=>$message,"phone"=>$phone,"code"=>$code,"status"=>$status);
-        $id=M('phone_code')->add($data);
+        $status = "发送失败";
+        $data = array("message" => $message, "phone" => $phone, "code" => $code, "status" => $status);
+        $id = M('phone_code')->add($data);
         return ['status' => 'no', 'data' => $xml->msg->__toString()];
 
     }
+}
 //获取短信验证码
 function get_code($phone){
     //查找最近发送情况
@@ -68,9 +70,6 @@ function code_source($type){
     }
 
     return $text;
-}
-
-
 }
 
 

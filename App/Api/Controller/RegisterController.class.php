@@ -112,6 +112,7 @@ class RegisterController extends CommonController
             echo api_json(null,$code,D('Error')->getText($code));exit();
         }
         $message = code_source($type);
+//        var_dump($message);
         $captcha= sender_code($phone,$message);
         if($captcha['status'] == 'ok'){
             $code = '200';
