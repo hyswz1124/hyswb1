@@ -42,6 +42,10 @@ class UserController extends CommonController
         }else{
             $data['mphone'] = $account_new;
         }
+        $is = M('Users')->where($data)->find();
+        if($is){
+            api_json('', 400, '手机号或者邮箱已存在');
+        }
         $data['update_time'] = datetimenew();
         $rs = M('Users')->where('id='.$this->userInfo['id'])->save($data);
         if($rs === false){
