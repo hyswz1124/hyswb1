@@ -43,7 +43,7 @@ class LoginController extends CommonController
         $return['mphone'] = $data['mphone'];
         $return['email'] = $data['email'];
         $return['super_token'] = $data['super_token'];
-        $return['all_earnings'] = $data['earnings'];
+        $return['all_earnings'] = $data['all_earnings'];
         $return['govern_earnings'] = $data['govern_earnings'];
         $return['frozen_earnings'] = $data['frozen_earnings'];
         $return['token'] = $token;
