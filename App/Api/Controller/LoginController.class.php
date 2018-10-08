@@ -17,6 +17,9 @@ class LoginController extends CommonController
         parent::__construct();
     }
 
+    /**
+     * 登录
+     */
     public function index(){
         $user = I('user', '', 'trim');
         $pass = I('pwd', '', 'trim');

@@ -19,10 +19,16 @@ class UserController extends CommonController
         $this->userInfo =  $this->checkLogin();
     }
 
+    /**
+     * 用户信息
+     */
     public function getUser(){
         api_json($this->userInfo, 200, '获取用户信息成功');
     }
 
+    /**
+     * 更换账号
+     */
     public function changeAccount(){
         $account_old = I('account_old', '', 'trim');
         $account_new = I('account_new', '', 'trim');
@@ -54,6 +60,9 @@ class UserController extends CommonController
         api_json('', 200, '更改成功');
     }
 
+    /**
+     * 填写 ETH 地址
+     */
     public function setEthAddress(){
         $eth_address = I('eth_address', '', 'trim');
         if(!$eth_address){

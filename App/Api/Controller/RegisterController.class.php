@@ -5,10 +5,9 @@ use Think\Controller;
 
 class RegisterController extends CommonController
 {
-    public function indexs()
-    {
-        var_dump(222);
-    }
+    /**
+     * 用户注册
+     */
     public function index(){
         $user = I('user', '', 'trim');
         $passwd = I('pwd', '', 'trim');
