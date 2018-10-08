@@ -50,6 +50,7 @@ class RegisterController extends CommonController
 //        }
         $data['password'] = password_hash($passwd, PASSWORD_DEFAULT);
         $data['code'] = $this->initcode();
+        $data['create_time'] = datetimenew();
         if($invitation_code){
             $super = M('users')->field('id,one_superId')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
             if($super){
