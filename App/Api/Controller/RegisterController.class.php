@@ -10,8 +10,8 @@ class RegisterController extends CommonController
         var_dump(222);
     }
     public function index(){
-        $user = I('user');
-        $passwd = I('pwd');
+        $user = I('user', '', 'trim');
+        $passwd = I('pwd', '', 'trim');
         $phone_code = I('phone_code');
         $checkpwd = I('checkpwd');
         $name = I('name');
