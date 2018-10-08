@@ -24,8 +24,8 @@ class UserController extends CommonController
     }
 
     public function changeAccount(){
-        $account_old = I('account_old');
-        $account_new = I('account_new');
+        $account_old = I('account_old', '', 'trim');
+        $account_new = I('account_new', '', 'trim');
         if(!$account_old or !$account_new){
             api_json('', 400, '参数不能为空');
         }
@@ -54,4 +54,17 @@ class UserController extends CommonController
         api_json('', 200, '更改成功');
     }
 
+    public function setEthAddress(){
+        $eth_address = I('eth_address', '', 'trim');
+        if(!$eth_address){
+            api_json('', 400, 'ETH 地址不能为空');
+        }
+        $data['eth_address'] = $eth_address;
+        $data['update_time'] = datetimenew();
+        $rs = M('Users')->where('id='.$this->userInfo['id'])->save($data);
+        if($rs === false){
+            api_json('', 500, '填写失败，请重试');
+        }
+        api_json('', 200, '填写成功');
+    }
 }
