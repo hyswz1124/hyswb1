@@ -50,6 +50,9 @@ class RechargeController extends CommonController {
     public function create(){
         $user = $this->userInfo;
         $eth = I('eth');
+        if(empty($eth)){
+            api_json(null,'300','充值eth数不能为空');
+        }
         M('trades')->startTrans();
         try {
             $trade = [
@@ -65,7 +68,7 @@ class RechargeController extends CommonController {
             if ($settle['status'] === 'ok') {
                 $code = $this->initcode();
                 M('trades')->commit();
-                api_json($code,'200','解锁成功');
+                api_json(1,'200','解锁成功');
             }
 
         } catch (\Exception $e) {
