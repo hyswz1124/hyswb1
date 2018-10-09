@@ -17,9 +17,12 @@ class LoginController extends CommonController
         parent::__construct();
     }
 
+    /**
+     * 登录
+     */
     public function index(){
-        $user = I('user', '');
-        $pass = I('pwd', '');
+        $user = I('user', '', 'trim');
+        $pass = I('pwd', '', 'trim');
         $where['mphone|email'] = $user;
 //        $where['password'] = password_hash($pass, PASSWORD_DEFAULT);
         $where['status'] = 0;

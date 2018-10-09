@@ -617,7 +617,9 @@ function dd($string = ''){
     var_dump($string);
     exit;
 }
-
+function datetimenew(){
+    return date('Y-m-d H:i:s', time());
+}
 ?>
 
 

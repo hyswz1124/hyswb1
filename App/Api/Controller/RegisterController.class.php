@@ -5,13 +5,12 @@ use Think\Controller;
 
 class RegisterController extends CommonController
 {
-    public function indexs()
-    {
-        var_dump(222);
-    }
+    /**
+     * 用户注册
+     */
     public function index(){
-        $user = I('user');
-        $passwd = I('pwd');
+        $user = I('user', '', 'trim');
+        $passwd = I('pwd', '', 'trim');
         $phone_code = I('phone_code');
         $checkpwd = I('checkpwd');
         $name = I('name');
@@ -50,6 +49,7 @@ class RegisterController extends CommonController
 //        }
         $data['password'] = password_hash($passwd, PASSWORD_DEFAULT);
         $data['code'] = $this->initcode();
+        $data['create_time'] = datetimenew();
         if($invitation_code){
             $super = M('users')->field('id,one_superId')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
             if($super){
