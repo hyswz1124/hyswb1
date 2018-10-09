@@ -10,6 +10,7 @@ use Think\Controller;
 class CommonController extends Controller
 {
     protected $userId   = 0;
+    protected $systemId   = 0;
     protected $nickname = '';
 
 

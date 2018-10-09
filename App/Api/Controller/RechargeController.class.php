@@ -14,8 +14,12 @@ class RechargeController extends CommonController {
     public function __construct()
     {
         parent::__construct();
-//        $this->userInfo =  $this->checkLogin();
+        $this->userInfo =  $this->checkLogin();
     }
+
+    /**
+     * 用户解锁
+     */
     public function unlocking(){
         $user = $this->userInfo;
         $eth = 0.02;
@@ -56,6 +60,13 @@ class RechargeController extends CommonController {
      */
     public function create(){
         $user = $this->userInfo;
+        $is_where['mode'] = 'recharge';
+        $is_where['status'] = 0;
+        $is_where['user_id'] = $user['id'];
+        $is_ing = M('trades')->where($is_where)->find();
+        if($is_ing){
+            api_json('', 300, '存在待审核的交易');
+        }
         $eth = I('eth');
         if(empty($eth)){
             api_json(null,'300','充值eth数目不能为空');
