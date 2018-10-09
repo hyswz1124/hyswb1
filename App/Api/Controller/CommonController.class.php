@@ -16,6 +16,7 @@ class CommonController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->systemId = 0;
     }
 
 //	public function _initialize() {

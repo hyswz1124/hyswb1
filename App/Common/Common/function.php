@@ -72,6 +72,112 @@ function code_source($type){
     return $text;
 }
 
+/**
+ * 此方法程序为交易结算
+ * @author  wmt<1027918160@qq.com>
+ * @param type $order
+ * @return type
+ */
+function trade_settle($trade_id,$current_user) {
+    $settle_trade = M('trades')->where("status = 0 and id = {$trade_id}")->find();
+    if (empty($settle_trade)) {
+        return ['status' => 'no', 'data' => '交易不存在'];
+    }
+    $amount = $settle_trade['eth'];
+    if ($settle_trade['mode'] !== 'unlock') {
+        $users = [
+            'user_recommender_one' => [
+                'id' => 0,
+                'status'=>0,
+                'amount' => 0.08 * $amount,
+                'message' => '推荐人一代分成'
+            ],
+            'user_recommender_two' => [
+                'id' => 0,
+                'status'=>0,
+                'amount' =>0.05 * $amount, //
+                'message' => '推荐人二代分成'
+            ],
+            'divide_bonus_pool_one' => [
+                'id' => 0,
+                'status'=>0,
+                'amount' => 0.05 * $amount,
+                'message' => '推荐人一代分红奖金池收入'
+            ],
+            'divide_bonus_pool_two' => [
+                'id' => 0,
+                'status'=>0,
+                'amount' =>0.03 * $amount, //0.2 * $amount['gain'],
+                'message' => '推荐人二代分红奖金池收入'
+            ],
+            'development_bonus_pool_one' => [
+                'id' => 0,
+                'status'=>0,
+                'amount' => 0.02 * $amount,
+                'message' => '推荐人一代发展奖金池收入'
+            ],
+            'development_bonus_pool_two' => [
+                'id' => 0,
+                'status'=>0,
+                'amount' =>0.02 * $amount, //0.2 * $amount['gain'],
+                'message' => '推荐人二代发展奖金池收入'
+            ],
+//                'vendor' => [
+//                    'id' => 0,
+//                    'amount' => $amount,
+//                    'message' => '订单' . $order_ids . '收益'
+//                ]
+        ];
+
+        $userd = M('users')->find($settle_trade['user_id']);
+        if($userd['one_superId']){
+            $users['user_recommender_one']['id'] = $userd['one_superId'];
+            $users['user_recommender_one']['status'] = $users['divide_bonus_pool_one']['status'] = $users['development_bonus_pool_one']['status'] = 1;
+
+        }
+        if($userd['two_superId']){
+            $users['user_recommender_two']['id'] = $userd['two_superId'];
+            $users['user_recommender_two']['status'] = $users['divide_bonus_pool_two']['status'] = $users['development_bonus_pool_two']['status'] = 1;
+        }
+
+        foreach ($users as $mode => $user) {
+            if (empty($user['id']) && $user['status'] != 1) {
+                continue;
+            }
+
+            $trade['user_id'] = $user['id'];
+            $trade['related_id'] = $settle_trade['user_id'];
+//                $trade['trade_ids'] = '{' . $order['trade_id'] . '}';
+            $trade['mode'] = 'income_' . $mode;
+            $trade['message'] = $user['message'];
+            $trade['eth'] = $user['amount'];
+            $trade['status'] = 1;
+            $trade_id = M('trades')->add($trade);
+
+            $owner = M('users')->field('eth')->find($user['id']);
+            if ($mode === 'user_recommender_one' || $mode === 'user_recommender_two') {
+                $payment['trade_id'] = $trade_id;
+                $payment['mode'] = 'finances';
+                $payment['beamount'] = $owner['eth'];
+                $payment['afamount'] = ($owner['eth']) + $user['amount'];
+                $payment['eth'] = $user['amount'];
+                $payment['status'] = 1;
+                M('payments')->add($payment);
+
+                M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) + $user['amount'],'dynamic_earnings'=>$owner['dynamic_earnings'] +  $user['amount'], 'update_time' => 'now()']);
+            }elseif($mode === 'divide_bonus_pool_one' || $mode === 'divide_bonus_pool_two'){
+                M('bonus_pool')->where('type = 1')->setInc('eth',$user['amount']);
+            }else{
+                M('bonus_pool')->where('type = 2')->setInc('eth',$user['amount']);
+            }
+        }
+        M('users')->where("id = {$settle_trade['user_id']}")->save(['eth'=>$current_user['eth']+$amount,'update_time' => 'now()']);
+    }
+
+    M('trades')->where("id  = {$trade_id}")->save(['status' => 1, 'update_time' => 'now()']);
+
+    return ['status' => 'ok', 'data' => '结算成功'];
+}
 
 
 
