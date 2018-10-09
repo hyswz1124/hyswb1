@@ -5,7 +5,7 @@ use Think\Controller;
 
 class RechargeController extends CommonController {
     /**
-     * 此方法程序为管理员给用户eth充值、积分充值,用户解锁
+     * 此方法程序为用户eth充值、积分充值,用户解锁
      * @author  wmt<1027918160@qq.com>
      * @date    2018-10-08
      */
