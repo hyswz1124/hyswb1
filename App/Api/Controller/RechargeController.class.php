@@ -106,4 +106,51 @@ class RechargeController extends CommonController {
 //            api_json(null,'500',$e->getMessage());
 //        }
     }
+
+
+    /**
+     * 充值交易详情
+     */
+    public function details(){
+        $user = $this->userInfo;
+        $where['mode'] = 'recharge';
+        $where['user_id'] = $user['id'];
+        $order = 'create_time desc';
+        $data = M('trades')->where($where)->order($order)->find();
+        $return = array();
+        if($data){
+            $return['status'] = $data['status'];
+            $return['eth'] = $data['eth'];
+            $return['eth_address'] = $user['eth_address'];
+        }
+        api_json($return, 200, '交易详情');
+    }
+
+    /**
+     * 用户撤回交易
+     */
+    public function recall(){
+        $user = $this->userInfo;
+        $where['mode'] = 'recharge';
+        $where['user_id'] = $user['id'];
+        $order = 'create_time desc';
+        $data = M('trades')->where($where)->order($order)->find();
+        $return = array();
+        if(!$data){
+            api_json('', 400, '无可撤销交易');
+        }
+        if($data['status'] == 1){
+            api_json('', 400, '交易已完成，不可撤销');
+        }
+        if($data['status'] == 2 or $data['status'] == 3){
+            api_json('', 400, '交易已关闭，无需撤销');
+        }
+        $up['status'] = 2;
+        $up_where['id'] = $data['id'];
+        $rs = M('trades')->where($up_where)->save($up);
+        if($rs === false){
+            api_json('', 500, '撤销失败，请重试');
+        }
+        api_json(1, 200, '撤销成功');
+    }
 }
