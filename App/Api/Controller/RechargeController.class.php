@@ -14,7 +14,7 @@ class RechargeController extends CommonController {
     public function __construct()
     {
         parent::__construct();
-        $this->userInfo =  $this->checkLogin();
+//        $this->userInfo =  $this->checkLogin();
     }
     public function unlocking(){
         $user = $this->userInfo;
@@ -22,57 +22,74 @@ class RechargeController extends CommonController {
         if($user['eth'] < $eth){
             api_json(null,'600','账户ETH钱包余额不足');
         }
-        M('trades')->startTrans();
-        try {
+
             $trade = [
                 'user_id' => $user['id'],
                 'mode' => 'unlock',
                 'related_id' => $this->systemId,
                 'message' => '用户解锁',
-                'status' => 0,
-                'eth' => $eth,
+                'status' => 1,
+                'eth' => $eth
             ];
             $trade_id = M('trades')->add($trade);
-            $settle = trade_settle($trade_id,$user);
-            if ($settle['status'] === 'ok') {
+            $payment = [
+                'trade_id' => $trade_id,
+                'mode' => 'balance',
+                'eth' => $eth,
+                'beamount' => $user['eth'],
+                'afamount' => $user['eth'] + $eth,
+                'status' => 1
+            ];
+           $payment_id = M('payments')->add($payment);
+            if ($trade_id && $payment_id) {
                 $code = $this->initcode();
-                M('users')->where('id='.$user['id'])->save(['is_js'=>1,'code'=> $code]);
-                M('orders')->commit();
+                M('users')->where('id='.$user['id'])->save(['is_js'=>1,'code'=> $code,'eth'=>$user['eth']-$eth,'update_time' => 'now()']);
+//                M('users')->where("id = {$user['id']}")->setDec('eth',$eth);
                 api_json($code,'200','解锁成功');
+            }else{
+                api_json(null,'500','解锁失败');
             }
-
-        } catch (\Exception $e) {
-            M('trades')->rollback();
-            api_json(null,'500',$e->getMessage());
-        }
     }
 
+    /**
+     * 用户充值接口
+     */
     public function create(){
         $user = $this->userInfo;
         $eth = I('eth');
         if(empty($eth)){
-            api_json(null,'300','充值eth数不能为空');
+            api_json(null,'300','充值eth数目不能为空');
         }
-        M('trades')->startTrans();
-        try {
+
+//        M('trades')->startTrans();
+//        try {
             $trade = [
                 'user_id' => $user['id'],
                 'mode' => 'recharge',
                 'related_id' => $this->systemId,
                 'message' => '用户充值',
                 'status' => 0,
-                'eth' => $eth,
+                'eth' => $eth
             ];
+            if(I('file')){
+                $root_directory = './Public/';
+                $subdirectory = 'Uploads/img/';
+                $img = $this->upload($root_directory,$subdirectory);
+                if(!$img || $img['status'] == 'no'){
+                    api_json(null,'500',$img['data']);
+                }
+                $trade['photo'] = $img['data'];
+            }
             $trade_id = M('trades')->add($trade);
-            $settle = trade_settle($trade_id,$user);
-            if ($settle['status'] === 'ok') {
-                M('trades')->commit();
-                api_json(1,'200','解锁成功');
+            if ($trade_id) {
+                api_json(1,'200','充值提交成功');
+            }else{
+                api_json(null,'500','网络故障');
             }
 
-        } catch (\Exception $e) {
-            M('trades')->rollback();
-            api_json(null,'500',$e->getMessage());
-        }
+//        } catch (\Exception $e) {
+//            M('trades')->rollback();
+//            api_json(null,'500',$e->getMessage());
+//        }
     }
 }

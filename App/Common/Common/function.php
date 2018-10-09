@@ -78,7 +78,7 @@ function code_source($type){
  * @param type $order
  * @return type
  */
-function trade_settle($trade_id,$current_user) {
+function trade_settle($trade_id) {
     $settle_trade = M('trades')->where("status = 0 and id = {$trade_id}")->find();
     if (empty($settle_trade)) {
         return ['status' => 'no', 'data' => '交易不存在'];
@@ -171,7 +171,14 @@ function trade_settle($trade_id,$current_user) {
                 M('bonus_pool')->where('type = 2')->setInc('eth',$user['amount']);
             }
         }
-        M('users')->where("id = {$settle_trade['user_id']}")->save(['eth'=>$current_user['eth']+$amount,'update_time' => 'now()']);
+        $payment['trade_id'] = $trade_id;
+        $payment['mode'] = 'balance';
+        $payment['beamount'] = $userd['eth'];
+        $payment['afamount'] = ($userd['eth']) + $amount;
+        $payment['eth'] = $amount;
+        $payment['status'] = 1;
+        M('payments')->add($payment);
+        M('users')->where("id = {$settle_trade['user_id']}")->setInc('eth',$amount);
     }
 
     M('trades')->where("id  = {$trade_id}")->save(['status' => 1, 'update_time' => 'now()']);

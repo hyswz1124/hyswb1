@@ -117,4 +117,26 @@ class CommonController extends Controller
         }
         return true;
     }
+    public function upload($root_directory,$subdirectory){
+        $upload = new \Think\Upload();// 实例化上传类
+        $upload->maxSize   =     3145728 ;// 设置附件上传大小
+        $upload->exts      =     array('jpg', 'gif', 'png', 'jpeg','pdf');// 设置附件上传类型
+        $upload->rootPath  =     $root_directory; // 设置附件上传根目录
+        $upload->savePath  =     $subdirectory; // 设置附件上传（子）目录
+        if(!file_exists($root_directory.$subdirectory)){
+            mkdir($root_directory.$subdirectory,777,true);
+        }
+        // 上传文件
+        $info   =   $upload->upload();
+        //print_r($info);
+        if(!$info) {// 上传错误提示错误信息
+            return ['status'=>'no','data'=>$upload->getError()];
+        }else{// 上传成功
+            foreach($info as $file){
+                $bigimg = $file['savepath'].$file['savename'];
+            }
+            return ['status'=>'ok','data'=>$bigimg];
+        }
+    }
+
 }
