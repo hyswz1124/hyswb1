@@ -22,6 +22,9 @@ class RechargeController extends CommonController {
      */
     public function unlocking(){
         $user = $this->userInfo;
+        if($user['is_js']){
+            api_json('', 600, '该功能已经解锁');
+        }
         $eth = 0.02;
         if($user['eth'] < $eth){
             api_json(null,'600','账户ETH钱包余额不足');
