@@ -66,7 +66,6 @@ class RechargeController extends CommonController {
             $trade_id = M('trades')->add($trade);
             $settle = trade_settle($trade_id,$user);
             if ($settle['status'] === 'ok') {
-                $code = $this->initcode();
                 M('trades')->commit();
                 api_json(1,'200','解锁成功');
             }
