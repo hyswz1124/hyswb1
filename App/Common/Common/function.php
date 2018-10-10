@@ -627,6 +627,21 @@ function dd($string = ''){
 function datetimenew(){
     return date('Y-m-d H:i:s', time());
 }
+
+
+//判断数字有几位小数
+function getFloatLength($num) {
+    $count = 0;
+
+    $temp = explode ( '.', $num );
+
+    if (sizeof ( $temp ) > 1) {
+        $decimal = end ( $temp );
+        $count = strlen ( $decimal );
+    }
+
+    return $count;
+}
 ?>
 
 

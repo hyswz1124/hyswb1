@@ -30,6 +30,10 @@ class CommonController extends Controller
 ////		session("user_id", 1);
 //	}
 
+    public function _empty()
+    {
+        echo api_json(null,404,'未知的请求');exit();
+    }
 
     /**
      * 检查登陆状态
