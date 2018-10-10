@@ -18,7 +18,7 @@ class RechargeController extends CommonController {
     }
 
     /**
-     * 用户解锁
+     * 用户解锁邀请码
      */
     public function unlocking(){
         $user = $this->userInfo;
@@ -34,7 +34,7 @@ class RechargeController extends CommonController {
                 'user_id' => $user['id'],
                 'mode' => 'unlock',
                 'related_id' => $this->systemId,
-                'message' => '用户解锁',
+                'message' => '用户解锁邀请码',
                 'status' => 1,
                 'eth' => $eth
             ];

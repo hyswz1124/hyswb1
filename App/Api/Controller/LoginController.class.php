@@ -46,6 +46,7 @@ class LoginController extends CommonController
             api_json('', 400, '登录失败');
         }
         unset($data['password']);
+        $data['token'] = $token;
         api_json($data, 200, '登录成功');
     }
 }
