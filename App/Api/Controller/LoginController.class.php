@@ -24,10 +24,14 @@ class LoginController extends CommonController
         $user = I('user', '', 'trim');
         $pass = I('pwd', '', 'trim');
         $where['mphone|email'] = $user;
+        if(!$user or !$pass){
+            api_json('', 400, '参数为空');
+        }
 //        $where['password'] = password_hash($pass, PASSWORD_DEFAULT);
         $where['status'] = 0;
         $where['deleted'] = 0;
-        $data = M('users')->where($where)->find();
+        $field = 'id, nickname, code,password, mphone, email, is_js, token, super_token, eth, eth_address, all_earnings, dynamic_earnings, dividend_earnings, node_earnings, paradrop_earnings, invite_earnings, govern_earnings, frozen_earnings';
+        $data = M('users')->where($where)->field($field)->find();
         if(!$data){
             api_json('', 400, '用户不存在或者已被禁用');
         }
@@ -41,15 +45,7 @@ class LoginController extends CommonController
         if (false === $result) {
             api_json('', 400, '登录失败');
         }
-
-        $return['nickname'] = $data['nickname'];
-        $return['mphone'] = $data['mphone'];
-        $return['email'] = $data['email'];
-        $return['super_token'] = $data['super_token'];
-        $return['all_earnings'] = $data['all_earnings'];
-        $return['govern_earnings'] = $data['govern_earnings'];
-        $return['frozen_earnings'] = $data['frozen_earnings'];
-        $return['token'] = $token;
-        api_json($return, 200, '登录成功');
+        unset($data['password']);
+        api_json($data, 200, '登录成功');
     }
 }
