@@ -71,8 +71,8 @@ class RechargeController extends CommonController {
             api_json('', 300, '存在待审核的交易');
         }
         $eth = I('eth');
-        if(empty($eth)){
-            api_json(null,'300','充值eth数目不能为空');
+        if(empty($eth) or !is_numeric($eth)){
+            api_json(null,'300','充值eth数目不正确');
         }
 
 //        M('trades')->startTrans();
@@ -120,6 +120,7 @@ class RechargeController extends CommonController {
         $return = array();
         if($data){
             $return['status'] = $data['status'];
+            $return['photo'] =  C('APPHOST').$data['photo'];
             $return['eth'] = $data['eth'];
             $return['eth_address'] = $user['eth_address'];
         }
