@@ -51,6 +51,7 @@ class RechargeController extends CommonController {
            $payment_id = M('payments')->add($payment);
             if ($trade_id && $payment_id) {
                 $code = $this->initcode();
+                $this->superCheck($user['id'],$eth);
                 $rs = M('users')->where('id='.$user['id'])->save(['is_js'=>1,'code'=> $code,'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
                 if($rs === false){
                     $model->rollback();
@@ -62,6 +63,84 @@ class RechargeController extends CommonController {
                 $model->rollback();
                 api_json(null,'500','解锁失败');
             }
+    }
+
+    /**
+     * 推荐人获利
+     */
+    public function superCheck($userId,$eth){
+        $one_superId = M('users')->where('id',$userId)->getField('one_superId');
+        if(!$one_superId){
+            return false;
+        }
+        $one_super = M('users')->find($one_superId);
+        if(!$one_super){
+            return false;
+        }
+        $tradeSuper = [
+            'user_id' => $one_superId,
+            'mode' => 'income_unlock',
+            'related_id' => $this->systemId,
+            'message' => '推荐用户解锁获利',
+            'status' => 1,
+            'eth' => $eth
+        ];
+        $trade_id_super = M('trades')->add($tradeSuper);
+        $paymentSuper = [
+            'trade_id' => $trade_id_super,
+            'mode' => 'finances',
+            'eth' => $eth,
+            'beamount' => $one_super['eth'],
+            'afamount' => $one_super['eth'] + $eth,
+            'status' => 1
+        ];
+        $payment_id_super = M('payments')->add($paymentSuper);
+        if($trade_id_super && $payment_id_super){
+            M('users')->where('id='.$one_superId)->save(['eth'=>$one_super['eth']+$eth,'update_time' => 'now()']);
+        }
+        return true;
+
+    }
+
+    /**
+     * 户提现
+     * @author  wmt<1027918160@qq.com>
+     * @date    2018-10-10
+     */
+    public function cash(){
+        $user = $this->userInfo;
+        $eth = I('eth');
+        if($user['eth'] < $eth){
+            api_json(null,'600','账户ETH钱包余额不足');
+        }
+        M('trades')->startTrans();
+        $trade = [
+            'user_id' => $user['id'],
+            'mode' => 'cash',
+            'related_id' => $this->systemId,
+            'message' => '用户提现',
+            'status' => 0,
+            'eth' => $eth
+        ];
+        $trade_id = M('trades')->add($trade);
+        $payment = [
+            'trade_id' => $trade_id,
+            'mode' => 'balance',
+            'eth' => $eth,
+            'beamount' => $user['eth'],
+            'afamount' => $user['eth'] - $eth,
+            'status' => 1
+        ];
+        $payment_id = M('payments')->add($payment);
+        $result = M('users')->where('id',$user['id'])->setDec('eth',$eth);
+        if ($trade_id && $payment_id && $result) {
+            M('trades')->commit();
+            api_json(1,'200','提现提交成功');
+        }else{
+            M('trades')->rollback();
+            api_json(null,'500','网络故障');
+        }
+
     }
 
 
