@@ -30,7 +30,7 @@ class LoginController extends CommonController
 //        $where['password'] = password_hash($pass, PASSWORD_DEFAULT);
         $where['status'] = 0;
         $where['deleted'] = 0;
-        $field = 'id, nickname, code,password, mphone, email, is_js, token, super_token, eth, eth_address, all_earnings,all_token, all_eth, dynamic_earnings, dividend_earnings, node_earnings, paradrop_earnings, invite_earnings, govern_earnings, frozen_earnings';
+        $field = 'id, nickname, code,password, mphone, email, is_js, is_jsgame, token, super_token, eth, eth_address, all_earnings,all_token, all_eth, dynamic_earnings, dividend_earnings, node_earnings, paradrop_earnings, invite_earnings, govern_earnings, frozen_earnings';
         $data = M('users')->where($where)->field($field)->find();
         if(!$data){
             api_json('', 400, '用户不存在或者已被禁用');
