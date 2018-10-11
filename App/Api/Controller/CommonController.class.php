@@ -129,7 +129,7 @@ class CommonController extends Controller
         $upload->rootPath  =     $root_directory; // 设置附件上传根目录
         $upload->savePath  =     $subdirectory; // 设置附件上传（子）目录
         if(!file_exists($root_directory.$subdirectory)){
-            mkdir($root_directory.$subdirectory,777,true);
+            mkdir($root_directory.$subdirectory,493,true);
         }
         // 上传文件
         $info   =   $upload->upload();
