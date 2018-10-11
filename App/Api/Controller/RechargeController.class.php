@@ -29,7 +29,8 @@ class RechargeController extends CommonController {
         if($user['eth'] < $eth){
             api_json(null,'600','账户ETH钱包余额不足');
         }
-
+        $model = M('trades');
+        $model->startTrans();
             $trade = [
                 'user_id' => $user['id'],
                 'mode' => 'unlock',
@@ -50,10 +51,15 @@ class RechargeController extends CommonController {
            $payment_id = M('payments')->add($payment);
             if ($trade_id && $payment_id) {
                 $code = $this->initcode();
-                M('users')->where('id='.$user['id'])->save(['is_js'=>1,'code'=> $code,'eth'=>$user['eth']-$eth,'update_time' => 'now()']);
-//                M('users')->where("id = {$user['id']}")->setDec('eth',$eth);
+                $rs = M('users')->where('id='.$user['id'])->save(['is_js'=>1,'code'=> $code,'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
+                if($rs === false){
+                    $model->rollback();
+                    api_json(null,'500','解锁失败');
+                }
+                $model->commit();
                 api_json($code,'200','解锁成功');
             }else{
+                $model->rollback();
                 api_json(null,'500','解锁失败');
             }
     }
@@ -71,7 +77,8 @@ class RechargeController extends CommonController {
         if($user['eth'] < $eth){
             api_json(null,'600','账户ETH钱包余额不足');
         }
-
+        $model = M('trades');
+        $model->startTrans();
             $trade = [
                 'user_id' => $user['id'],
                 'mode' => 'unlock',
@@ -91,10 +98,15 @@ class RechargeController extends CommonController {
             ];
            $payment_id = M('payments')->add($payment);
             if ($trade_id && $payment_id) {
-                M('users')->where('id='.$user['id'])->save(['is_jsgame'=>1, 'eth'=>$user['eth']-$eth,'update_time' => 'now()']);
-//                M('users')->where("id = {$user['id']}")->setDec('eth',$eth);
+                $rs = M('users')->where('id='.$user['id'])->save(['is_jsgame'=>1, 'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
+                if($rs === false){
+                    $model->rollback();
+                    api_json(null,'500','解锁失败');
+                }
+                $model->commit();
                 api_json(1,'200','解锁成功');
             }else{
+                $model->rollback();
                 api_json(null,'500','解锁失败');
             }
     }
