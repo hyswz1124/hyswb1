@@ -96,7 +96,7 @@ class RechargeController extends CommonController {
         ];
         $payment_id_super = M('payments')->add($paymentSuper);
         if($trade_id_super && $payment_id_super){
-            M('users')->where('id='.$one_superId)->save(['eth'=>$one_super['eth']+$eth,'update_time' => 'now()']);
+            M('users')->where('id='.$one_superId)->save(['eth'=>$one_super['eth']+$eth,'update_time' => date('Y-m-d H:i:s', time())]);
         }
         return true;
 
