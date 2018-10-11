@@ -85,7 +85,7 @@ class RechargeController extends CommonController {
                 'status' => 0,
                 'eth' => $eth
             ];
-            if(I('file')){
+            if($_FILES){
                 $root_directory = './Public/';
                 $subdirectory = 'Uploads/img/';
                 $img = $this->upload($root_directory,$subdirectory);
