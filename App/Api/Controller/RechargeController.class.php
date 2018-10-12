@@ -110,7 +110,7 @@ class RechargeController extends CommonController {
     public function cash(){
         $user = $this->userInfo;
         if($user['is_freeze']){
-            api_json('', 100, '账号资金被冻结，不允许提现');
+            api_json('', 600, '账号资金被冻结，不允许提现');
         }
         $eth = I('eth');
         if($user['eth'] < $eth){
