@@ -81,6 +81,9 @@ class LevelController extends CommonController{
 
     public function buySuperToken(){
         $user = $this->checkLogin();
+        if($user['is_freeze']){
+            api_json('', 100, '账号资金被冻结，不允许交易');
+        }
         $super_token = I('super_token', 0);
         if($super_token <= 0 or !is_numeric($super_token)){
             api_json('', 400, '错误的参数');
