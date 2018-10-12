@@ -27,6 +27,9 @@ class OrdersController extends CommonController
         $user = $this->userInfo;
         $eth = I('eth');
         $super_token  = I('super_token');
+        if($user['is_freeze']){
+            api_json(null, 600, '账号资金被冻结，不允许挂单');
+        }
         if(empty($eth) || empty($super_token)){
             api_json(null,'300','积分或eth不能为空');
         }
@@ -93,6 +96,9 @@ class OrdersController extends CommonController
         if(!$old_order){
             api_json(null,'100','没有此挂单记录');
         }
+        if($user['is_freeze']){
+            api_json(null, 600, '账号资金被冻结，不允许操作挂单');
+        }
         $old_trade = M('trades')->where('order_no',$old_order['order_no'])->where('user_id',$user['id'])->where('status = 1')->find();
         if(!$old_trade){
             api_json(null,'100','没有此挂单交易记录');
@@ -143,7 +149,10 @@ class OrdersController extends CommonController
             'trades.mode'=>'list_deal',
             'orders.status'=>0
         ];
-        $data = M('trades')->join('orders on trades.order_no = orders.order_no')->where($where)->get();
+        $page = I('page',1,'int');
+        $limit = min(30, I('limit',10,'int'));
+        $data = M('trades')->field('users.nickname,users.mphone,users.email,orders.order_no,orders.eth,orders.token,orders.create_time')->join('users on users.user_id = trades.user_id')->join('orders on trades.order_no = orders.order_no')->where($where)->limit($limit*($page-1), $limit)->order("orders.id desc")->select();
+        api_json($data,'200','获取数据成功');
     }
 
 }
