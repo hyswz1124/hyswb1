@@ -78,7 +78,15 @@ class OrdersController extends CommonController
             api_json(null,'600','交易入库失败');
         }
         $model->commit();
-        api_json(1,'200','挂单成功');
+        $data = [
+            'nickname'=>$user['nickname'],
+            'mphone'=>$user['mphone'],
+            'email'=>$user['email'],
+            'order_no'=>$order['order_no'],
+            'eth'=>$order['token'],
+            'token'=>$order['token']
+        ];
+        api_json($data,'200','挂单成功');
     }
 
     /**
