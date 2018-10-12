@@ -33,11 +33,22 @@ class OrdersController extends CommonController
         if($user['super_token'] < $super_token){
             api_json(null,'600','用户积分不足');
         }
-        $model = M('trades');
+        $model = M('orders');
         $model->startTrans();
+        $order = [
+            'user_id' => $user['id'],
+            'order_no'=>generate_order_no(),
+            'related_id' => $this->systemId,
+            'message' => '用户挂单',
+            'status' => 0,
+            'token'=>$super_token,
+            'eth' => $eth
+        ];
+        $order_id = $model->add($order);
             $trade = [
                 'user_id' => $user['id'],
                 'mode' => 'list_deal',
+                'order_no'=>$order['order_no'],
                 'related_id' => $this->systemId,
                 'message' => '用户挂单',
                 'status' => 1,
@@ -49,17 +60,6 @@ class OrdersController extends CommonController
             $model->rollback();
             api_json(null,'600','交易入库失败');
         }
-          $order = [
-              'user_id' => $user['id'],
-              'order_no'=>generate_order_no(),
-              'trade_id' => $trade_id,
-              'related_id' => $this->systemId,
-              'message' => '用户挂单',
-              'status' => 0,
-              'token'=>$super_token,
-              'eth' => $eth
-          ];
-        $order_id = M('orders')->add($order);
             $payment = [
                 'trade_id' => $trade_id,
                 'mode' => 'token',
@@ -85,15 +85,15 @@ class OrdersController extends CommonController
      */
     public function cancel(){
         $user = $this->userInfo;
-        $orderId = I('orderId');
-        if(!$orderId){
+        $order_no = I('order_no');
+        if(!$order_no){
             api_json(null,'300','参数不足');
         }
-        $old_order = M('orders')->where('id',$orderId)->where('status = 0')->find();
+        $old_order = M('orders')->where('order_no',$order_no)->where('status = 0')->find();
         if(!$old_order){
             api_json(null,'100','没有此挂单记录');
         }
-        $old_trade = M('trades')->where('id',$old_order['trade_id'])->where('status = 1')->find();
+        $old_trade = M('trades')->where('order_no',$old_order['order_no'])->where('user_id',$user['id'])->where('status = 1')->find();
         if(!$old_trade){
             api_json(null,'100','没有此挂单交易记录');
         }
@@ -102,8 +102,9 @@ class OrdersController extends CommonController
         $trade = [
             'user_id' => $user['id'],
             'mode' => 'cancel_list_deal',
+            'order_no'=>$old_trade['order_no'],
             'related_id' => $this->systemId,
-            'message' => '用户取消挂单',
+            'message' => '用户取消订单号为'.$old_trade['order_no'].'的挂单',
             'status' => 1,
             'token'=>$old_trade['token'],
             'eth' => $old_trade['eth']
@@ -124,13 +125,25 @@ class OrdersController extends CommonController
         ];
         $payment_id = M('payments')->add($payment);
         $result = M('users')->where('id',$user['id'])->setInc('super_token',$old_trade['token']);
-        $res = M('orders')->where('id',$orderId)->save(['status'=>2,'update_time'=>date('Y-m-d H:i:s',time())]);
+        $res = M('orders')->where('order_no',$order_no)->save(['status'=>2,'update_time'=>date('Y-m-d H:i:s',time())]);
         if(!$trade_id || !$payment_id || !$res || !$result){
             $model->rollback();
             api_json(null,'600','交易入库失败');
         }
         $model->commit();
         api_json(1,'200','取消挂单成功');
+    }
+    /**
+     * 挂单列表
+     * audthor:wmt
+     * date:2018-10-12
+     */
+    public function deal_list(){
+        $where = [
+            'trades.mode'=>'list_deal',
+            'orders.status'=>0
+        ];
+        $data = M('trades')->join('orders on trades.order_no = orders.order_no')->where($where)->get();
     }
 
 }
