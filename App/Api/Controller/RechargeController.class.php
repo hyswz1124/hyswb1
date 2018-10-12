@@ -135,7 +135,7 @@ class RechargeController extends CommonController {
             'status' => 1
         ];
         $payment_id = M('payments')->add($payment);
-        $result = M('users')->where('id',$user['id'])->setDec('eth',$eth);
+        $result = M('users')->where('id='.$user['id'])->setDec('eth',$eth);
         if ($trade_id && $payment_id && $result) {
             M('trades')->commit();
             api_json(1,'200','提现提交成功');

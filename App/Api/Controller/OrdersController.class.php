@@ -72,7 +72,7 @@ class OrdersController extends CommonController
                 'status' => 1
             ];
          $payment_id = M('payments')->add($payment);
-        $result = M('users')->where('id',$user['id'])->setDec('super_token',$super_token);
+        $result = M('users')->where('id='.$user['id'])->setDec('super_token',$super_token);
         if(!$trade_id || !$payment_id || !$order_id || !$result){
             $model->rollback();
             api_json(null,'600','交易入库失败');
@@ -97,17 +97,19 @@ class OrdersController extends CommonController
     public function cancel(){
         $user = $this->userInfo;
         $order_no = I('order_no');
+//        var_dump($order_no);exit();
         if(!$order_no){
             api_json(null,'300','参数不足');
         }
-        $old_order = M('orders')->where('order_no',$order_no)->where('status = 0')->find();
+        $old_order = M('orders')->where("order_no = '{$order_no}' and status = 0")->find();
         if(!$old_order){
             api_json(null,'100','没有此挂单记录');
         }
         if($user['is_freeze']){
             api_json(null, 600, '账号资金被冻结，不允许操作挂单');
         }
-        $old_trade = M('trades')->where('order_no',$old_order['order_no'])->where('user_id',$user['id'])->where('status = 1')->find();
+        $old_trade = M('trades')->where("order_no = '{$old_order['order_no']}' and user_id = {$user['id']} and status = 1")->find();
+
         if(!$old_trade){
             api_json(null,'100','没有此挂单交易记录');
         }
@@ -138,8 +140,8 @@ class OrdersController extends CommonController
             'status' => 1
         ];
         $payment_id = M('payments')->add($payment);
-        $result = M('users')->where('id',$user['id'])->setInc('super_token',$old_trade['token']);
-        $res = M('orders')->where('order_no',$order_no)->save(['status'=>2,'update_time'=>date('Y-m-d H:i:s',time())]);
+        $result = M('users')->where('id='.$user['id'])->setInc('super_token',$old_trade['token']);
+        $res = M('orders')->where('order_no='.$order_no)->save(['status'=>2,'update_time'=>date('Y-m-d H:i:s',time())]);
         if(!$trade_id || !$payment_id || !$res || !$result){
             $model->rollback();
             api_json(null,'600','交易入库失败');
@@ -154,13 +156,14 @@ class OrdersController extends CommonController
      */
     public function deal_list(){
         $where = [
-            'trades.mode'=>'list_deal',
-            'orders.status'=>0
+            'a.mode'=>'list_deal',
+            'c.status'=>0
         ];
         $page = I('page',1,'int');
         $limit = min(30, I('limit',10,'int'));
-        $data = M('trades')->field('users.nickname,users.mphone,users.email,orders.order_no,orders.eth,orders.token,orders.create_time')->join('users on users.user_id = trades.user_id')->join('orders on trades.order_no = orders.order_no')->where($where)->limit($limit*($page-1), $limit)->order("orders.id desc")->select();
-        api_json($data,'200','获取数据成功');
+        $data = M('trades a')->field('b.nickname,b.mphone,b.email,c.order_no,c.eth,c.token,c.create_time')->join('yt_users b on b.id = a.user_id')->join('yt_orders c on a.order_no = c.order_no')->where($where)->limit($limit*($page-1), $limit)->order("c.id desc")->select();
+        $count = M('trades a')->field('b.nickname,b.mphone,b.email,c.order_no,c.eth,c.token,c.create_time')->join('yt_users b on b.id = a.user_id')->join('yt_orders c on a.order_no = c.order_no')->where($where)->count();
+        api_json(array('res'=>$data,'count'=>$count),'200','获取数据成功');
     }
 
 }
