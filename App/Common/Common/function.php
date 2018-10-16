@@ -197,8 +197,7 @@ function order_settle($order,$current_user){
     if (empty($settle_trade)) {
         return ['status' => 'no', 'data' => '订单结算失败'];
     }
-    $settle_order = M('trades')->where("status = 0 and user_id = {$order['user_id']}  and order_no = {$order['order_no']}")->find();
-    if (empty($settle_order)) {
+    if (empty($order)) {
         return ['status' => 'no', 'data' => '订单结算失败'];
     }
     $amount = $order['eth'];
