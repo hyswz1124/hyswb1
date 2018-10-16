@@ -182,6 +182,7 @@ function trade_settle($trade_id) {
     }
 
     M('trades')->where("id  = {$trade_id}")->save(['status' => 1, 'update_time' => date('Y-m-d H:i:s',time())]);
+    airdrop_reward($settle_trade['user_id']);
 
     return ['status' => 'ok', 'data' => '结算成功'];
 }
@@ -301,6 +302,43 @@ function order_settle($order,$current_user){
         M('orders')->where('id='.$order['id'])->save(['status'=>1,'update_time' =>date('Y-m-d H:i:s',time())]);
     }
     return ['status' => 'ok', 'data' => '结算成功'];
+}
+/**
+ * 此方法程序为充值额度空投奖励结算
+ * @author  wmt<1027918160@qq.com>
+ * @param type airdrop_pool
+ * @return type
+ */
+function airdrop_reward($user_id){
+        $total_eth = M('trades')->where("mode = 'unlock' and status = 1 and user_id=".$user_id)->sum('eth');
+        if($total_eth < 0.1){
+            return false;
+        }
+        $airdrop = M('airdrop_pool_dispose')->where("status = 1 and min_amount <= {$total_eth} and ({$total_eth} < max_amount or max_amount is null)");
+        if(!$airdrop){
+            return false;
+        }
+        $owner = M('users')->field('id,eth,paradrop_earnings')->where('id='.$user_id)->find();
+        $amount = M('bonus_pool')->where('type = 3')->getField('eth');
+        $trade['user_id'] = $user_id;
+        $trade['related_id'] = 0;
+    //                $trade['trade_ids'] = '{' . $order['trade_id'] . '}';
+        $trade['mode'] = 'income_airdrop_reward';
+        $trade['message'] = '充值空投奖励收入';
+        $trade['eth'] = $amount * $airdrop['proportion']/100;
+        $trade['status'] = 1;
+        $trade_ids = M('trades')->add($trade);
+       if($total_eth){
+           $payment['trade_id'] = $trade_ids;
+           $payment['mode'] = 'eth';
+           $payment['beamount'] = $owner['eth'];
+           $payment['afamount'] = ($owner['eth']) + $trade['eth'];
+           $payment['eth'] = $trade['eth'];
+           $payment['status'] = 1;
+           M('payments')->add($payment);
+           M('users')->where("id =".$user_id)->save(['eth' => ($owner['eth']) + $trade['eth'],'paradrop_earnings'=>($owner['paradrop_earnings'] + $trade['eth']), 'update_time' =>date('Y-m-d H:i:s',time())]);
+       }
+
 }
 
 /**
