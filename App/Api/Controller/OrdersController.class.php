@@ -165,5 +165,37 @@ class OrdersController extends CommonController
         $count = M('trades a')->field('b.nickname,b.mphone,b.email,c.order_no,c.eth,c.token,c.create_time')->join('yt_users b on b.id = a.user_id')->join('yt_orders c on a.order_no = c.order_no')->where($where)->count();
         api_json(array('res'=>$data,'count'=>$count),'200','获取数据成功');
     }
+    /**
+     * 用户购买挂单
+     * audthor:wmt
+     * date:2018-10-15
+     */
+    public function buy_deal(){
+        $user = $this->userInfo;
+        $order_no = I('order_no');
+        if(!$order_no){
+            api_json(null,300,'订单编号不能为空');
+        }
+        $order = M('orders')->where('order_no='.$order_no)->find();
+        if(!$order){
+            api_json(null,100,'该挂单不存在');
+        }
+        if($order['status']){
+            api_json(null,100,'该挂单已被交易或者已取消');
+        }
+        $sellerUser = M('users')->where('id='.$order['user_id'])->find();
+        if(!$sellerUser){
+            api_json(null,100,'该挂单不存在');
+        }
+        if($sellerUser['is_freeze']){
+            api_json(null, 600, '卖方账户被冻结，此挂单不可交易');
+        }
+        if($user['eth'] < $order['eth']){
+            api_json(null, 600, '余额不足，请充值');
+        }
+        $settle = order_settle($order_no,$user);
+
+    }
+
 
 }

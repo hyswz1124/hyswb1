@@ -152,19 +152,19 @@ function trade_settle($trade_id) {
             $trade['message'] = $user['message'];
             $trade['eth'] = $user['amount'];
             $trade['status'] = 1;
-            $trade_id = M('trades')->add($trade);
+            $trade_ids = M('trades')->add($trade);
 
-            $owner = M('users')->field('eth')->find($user['id']);
             if ($mode === 'user_recommender_one' || $mode === 'user_recommender_two') {
-                $payment['trade_id'] = $trade_id;
-                $payment['mode'] = 'finances';
+                $owner = M('users')->field('eth')->find($user['id']);
+                $payment['trade_id'] = $trade_ids;
+                $payment['mode'] = 'finances_eth';
                 $payment['beamount'] = $owner['eth'];
                 $payment['afamount'] = ($owner['eth']) + $user['amount'];
                 $payment['eth'] = $user['amount'];
                 $payment['status'] = 1;
                 M('payments')->add($payment);
 
-                M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) + $user['amount'],'dynamic_earnings'=>$owner['dynamic_earnings'] +  $user['amount'], 'update_time' => 'now()']);
+                M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) + $user['amount'],'dynamic_earnings'=>$owner['dynamic_earnings'] +  $user['amount'], 'update_time' => date('Y-m-d H:i:s',time())]);
             }elseif($mode === 'divide_bonus_pool_one' || $mode === 'divide_bonus_pool_two'){
                 M('bonus_pool')->where('type = 1')->setInc('eth',$user['amount']);
             }else{
@@ -172,7 +172,7 @@ function trade_settle($trade_id) {
             }
         }
         $payment['trade_id'] = $trade_id;
-        $payment['mode'] = 'balance';
+        $payment['mode'] = 'eth';
         $payment['beamount'] = $userd['eth'];
         $payment['afamount'] = ($userd['eth']) + $amount;
         $payment['eth'] = $amount;
@@ -181,13 +181,128 @@ function trade_settle($trade_id) {
         M('users')->where("id = {$settle_trade['user_id']}")->setInc('eth',$amount);
     }
 
-    M('trades')->where("id  = {$trade_id}")->save(['status' => 1, 'update_time' => 'now()']);
+    M('trades')->where("id  = {$trade_id}")->save(['status' => 1, 'update_time' => date('Y-m-d H:i:s',time())]);
 
     return ['status' => 'ok', 'data' => '结算成功'];
 }
+/**
+ * 此方法程序为挂单订单结算
+ * @author  wmt<1027918160@qq.com>
+ * @param type $order
+ * @return type
+ */
 
+function order_settle($order,$current_user){
+    $settle_trade = M('trades')->where("status = 1 and user_id = {$order['user_id']}  and order_no = {$order['order_no']}")->find();
+    if (empty($settle_trade)) {
+        return ['status' => 'no', 'data' => '订单结算失败'];
+    }
+    $settle_order = M('trades')->where("status = 0 and user_id = {$order['user_id']}  and order_no = {$order['order_no']}")->find();
+    if (empty($settle_order)) {
+        return ['status' => 'no', 'data' => '订单结算失败'];
+    }
+    $amount = $order['eth'];
+    $commission = $amount * 0.25;
+    if($settle_trade['mode'] == 'list_deal'){
+        $users = [
+            'buyers_deal' => [
+                'id' => 0,
+                'status'=>1,
+                'amount' => $amount,
+                'message' => '挂单'.$order['order_no'].'购买扣款'
+            ],
+            'buy_back_pool' => [
+                'id' => 0,
+                'status'=>1,
+                'amount' => 0.1 * $commission,
+                'message' => '挂单交易回购奖金池收入'
+            ],
+            'divide_bonus_pool' => [
+                'id' => 0,
+                'status'=>1,
+                'amount' =>0.05 * $commission, //
+                'message' => '挂单交易(分红)奖金池收入'
+            ],
+            'community_pool' => [
+                'id' => 0,
+                'status'=>1,
+                'amount' => 0.02 * $commission,
+                'message' => '挂单交易社区收入'
+            ],
+            'airdrop_pool' => [
+                'id' => 0,
+                'status'=>1,
+                'amount' =>0.03 * $commission, //0.2 * $amount['gain'],
+                'message' => '挂单交易空投奖金池收入'
+            ],
+            'buyers_deal_reward' => [
+                'id' => 0,
+                'status'=>1,
+                'amount' => 0.05 * $commission,
+                'message' => '挂单交易，买家奖励'
+            ],
+            'deal' => [
+                    'id' => 0,
+                   'status'=>1,
+                    'amount' => $amount * 0.75,
+                    'message' => '订单' . $order['order_no'] . '收益'
+                ]
+        ];
+        $users['buyers_deal_reward']['id'] = $users['buyers_deal']['id'] = $current_user['id'];
+        $users['deal']['id'] = $order['user_id'];
+        foreach($users as $mode=>$user){
+            if(empty($user['status'])){
+                continue;
+            }
+            $trade['user_id'] = $user['id'];
+            $trade['order_no'] = $order['order_no'];
+            $trade['related_id'] = $settle_trade['user_id'];
+//                $trade['trade_ids'] = '{' . $order['trade_id'] . '}';
+            if($mode === 'buyers_deal'){
+                $trade['mode'] = $mode;
+            }else{
+                $trade['mode'] = 'income_' . $mode;
+            }
+            $trade['message'] = $user['message'];
+            $trade['eth'] = $user['amount'];
+            $trade['status'] = 1;
+            $trade_ids = M('trades')->add($trade);
+            if($mode === 'buyers_deal'){
+                $owner = M('users')->field('eth')->find($user['id']);
+                $payment['trade_id'] = $trade_ids;
+                $payment['mode'] = 'eth';
+                $payment['beamount'] = $owner['eth'];
+                $payment['afamount'] = ($owner['eth']) - $user['amount'];
+                $payment['eth'] = $user['amount'];
+                $payment['status'] = 1;
+                M('payments')->add($payment);
+                M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) - $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
 
+            }elseif ($mode === 'buyers_deal_reward' || $mode === 'deal') {
+                $owner = M('users')->field('eth')->find($user['id']);
+                $payment['trade_id'] = $trade_ids;
+                $payment['mode'] = 'eth';
+                $payment['beamount'] = $owner['eth'];
+                $payment['afamount'] = ($owner['eth']) + $user['amount'];
+                $payment['eth'] = $user['amount'];
+                $payment['status'] = 1;
+                M('payments')->add($payment);
 
+                M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) + $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
+            }elseif($mode === 'buy_back_pool'){
+                M('bonus_pool')->where('type = 5')->setInc('eth',$user['amount']);
+            }elseif($mode === 'divide_bonus_pool'){
+                M('bonus_pool')->where('type = 1')->setInc('eth',$user['amount']);
+            }elseif($mode === 'community_pool'){
+                M('bonus_pool')->where('type = 4')->setInc('eth',$user['amount']);
+            }elseif($mode === 'airdrop_pool'){
+                M('bonus_pool')->where('type = 3')->setInc('eth',$user['amount']);
+            }
+        }
+        M('orders')->where('id='.$order['id'])->save(['status'=>1,'update_time' =>date('Y-m-d H:i:s',time())]);
+    }
+    return ['status' => 'ok', 'data' => '结算成功'];
+}
 
 /**
  * Request Headers
