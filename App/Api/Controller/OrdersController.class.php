@@ -229,7 +229,7 @@ class OrdersController extends CommonController
         if($user['eth'] < $order['eth']){
             api_json(null, 600, '余额不足，请充值');
         }
-        $settle = order_settle($order_no,$user);
+        $settle = order_settle($order,$user);
         if ($settle['status'] === 'ok') {
 //            M('trades')->commit();
             api_json(1,'200','购买成功');
