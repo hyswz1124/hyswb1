@@ -216,6 +216,9 @@ class OrdersController extends CommonController
         if(!$order){
             api_json(null,100,'该挂单不存在');
         }
+        if($user['id'] == $order['user_id']){
+            api_json(null,100,'不能购买自己的挂单');
+        }
         if($order['status']){
             api_json(null,100,'该挂单已被交易或者已取消');
         }
