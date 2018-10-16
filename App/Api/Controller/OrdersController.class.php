@@ -13,9 +13,45 @@ class OrdersController extends CommonController
         parent::__construct();
         $this->userInfo =  $this->checkLogin();
     }
-    public function index()
+
+    /**
+     * 统计
+     */
+    public function statistics()
     {
-        var_dump(222);
+        $user = $this->userInfo;
+        $where['mode'] = array('in', array('list_deal', 'cancel_list_deal'));
+        $where['user_id'] = $user['id'];
+        $where['status'] = 1;
+        $month = date('m', time());
+        for ($i=1; $i<=$month; $i++){
+            $where['create_time'] = array('like', '%' . date('Y-m', strtotime(date('Y-', time()).$i)) . '%');
+            //按月统计
+            $yearArr[date('Y-m', strtotime(date('Y-', time()).$i))] = M('trades')->where($where)->count();
+        }
+        $retuen['year'] = $yearArr;
+        $day = date('d', time());
+        for ($i=1; $i<=$day; $i++){
+            //按天统计
+            $where['create_time'] = array('like', '%' . date('Y-m-d', strtotime(date('Y-m-', time()).$i)) . '%');
+            $monthArr[date('Y-m-d', strtotime(date('Y-m-', time()).$i))] = M('trades')->where($where)->count();
+        }
+        $retuen['month'] = $monthArr;
+
+        $hour = date('H', time());
+        for ($i=1; $i<=$hour; $i++){
+            if($i < 10){
+                $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).'0'.$i . '%');
+            }else{
+                $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).$i . '%');
+            }
+            //当天按小时统计
+            $dayArr[$i] = M('trades')->where($where)->count();
+        }
+        $retuen['day'] = $dayArr;
+
+
+        api_json($retuen, 200, '统计数据');
     }
 
     /**
