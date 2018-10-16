@@ -230,6 +230,12 @@ class OrdersController extends CommonController
             api_json(null, 600, '余额不足，请充值');
         }
         $settle = order_settle($order_no,$user);
+        if ($settle['status'] === 'ok') {
+//            M('trades')->commit();
+            api_json(1,'200','购买成功');
+        }else{
+            api_json(null,'500','网络错误');
+        }
 
     }
 
