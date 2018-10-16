@@ -22,7 +22,6 @@ class OrdersController extends CommonController
         $user = $this->userInfo;
         $where['mode'] = array('in', array('list_deal', 'cancel_list_deal'));
         $where['user_id'] = $user['id'];
-        $where['user_id'] = 23;
         $where['status'] = 1;
         $month = date('m', time());
         for ($i=1; $i<=$month; $i++){
