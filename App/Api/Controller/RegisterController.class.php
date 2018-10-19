@@ -79,19 +79,13 @@ class RegisterController extends CommonController
      */
     public function get_node_level($super_id){
          $num = M('users')->where('one_superId='.$super_id)->count();
-         if($num > 1000){
-             $poration = 45;
-         }elseif($num = 1000){
-             $poration = 30;
-         }elseif($num = 800){
-             $poration = 20;
-         }elseif($num = 500){
-             $poration = 10;
-         }elseif($num = 200){
-             $poration = 5;
-         }else{
-             $poration = 0;
-         }
+         $node = M('node_pool_dispose')->where("status = 1 and ((type = 0 and num = {$num}) or (type = 1 and num < {$num}))")->find();
+        if($node && $node['proportion']){
+            $poration = $node['$poration'];
+        }else{
+            $poration = 0;
+        }
+
         return $poration;
     }
     /**
