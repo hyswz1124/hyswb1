@@ -51,10 +51,11 @@ class RegisterController extends CommonController
         $data['code'] = $this->initcode();
         $data['create_time'] = datetimenew();
         if($invitation_code){
-            $super = M('users')->field('id,one_superId')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
+            $super = M('users')->field('id,one_superId,eth,node_earnings')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
             if($super){
                 $data['one_superId'] = $super['id'];
                 $data['two_superId'] = $super['one_superId'];
+                $poration = $this->get_node_level($super['id']);
             }
         }
         $result = M('users')->add($data);
@@ -63,7 +64,59 @@ class RegisterController extends CommonController
             echo api_json(null,$code,D('Error')->getText($code));exit();
         }
         $code = '200';
+        if(isset($poration) && $poration){
+            $this->node_reward($super,$poration);
+        }
         echo api_json(1,$code,D('Error')->getText($code));
+    }
+    /**
+     * 获取节点奖励的级别
+     *
+     */
+    public function get_node_level($super_id){
+         $num = M('users')->where('one_superId='.$super_id)->count();
+         if($num > 1000){
+             $poration = 45;
+         }elseif($num = 1000){
+             $poration = 30;
+         }elseif($num = 800){
+             $poration = 20;
+         }elseif($num = 500){
+             $poration = 10;
+         }elseif($num = 200){
+             $poration = 5;
+         }else{
+             $poration = 0;
+         }
+        return $poration;
+    }
+    /**
+     * 节点奖励分红
+     * author:wmt
+     * date:2018-10-19
+     */
+    public function node_reward($user,$poration){
+        $amount = M('bonus_pool')->where('type = 1')->getField('eth');
+        $trade['user_id'] = $user['id'];
+        $trade['related_id'] = 0;
+        //                $trade['trade_ids'] = '{' . $order['trade_id'] . '}';
+        $trade['mode'] = 'income_node_reward';
+        $trade['message'] = '邀请节点奖励收入';
+        $trade['eth'] = $amount * 0.9 * $poration/100;
+        $trade['status'] = 1;
+        $trade_ids = M('trades')->add($trade);
+        if($trade_ids){
+            $payment['trade_id'] = $trade_ids;
+            $payment['mode'] = 'eth';
+            $payment['beamount'] = $user['eth'];
+            $payment['afamount'] = ($user['eth']) + $trade['eth'];
+            $payment['eth'] = $trade['eth'];
+            $payment['status'] = 1;
+            M('payments')->add($payment);
+            M('users')->where("id =".$user['id'])->save(['eth' => ($user['eth']) + $trade['eth'],'node_earnings'=>($user['node_earnings'] + $trade['eth']), 'update_time' =>date('Y-m-d H:i:s',time())]);
+            M('bonus_pool')->where('type = 1')->save(['eth'=>($amount - $trade['eth']),'update_time' =>date('Y-m-d H:i:s',time())]);
+        }
+
     }
     /**
      * 找回密码
