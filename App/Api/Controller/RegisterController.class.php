@@ -55,7 +55,7 @@ class RegisterController extends CommonController
             if($super){
                 $data['one_superId'] = $super['id'];
                 $data['two_superId'] = $super['one_superId'];
-                $poration = $this->get_node_level($super['id']);
+//                $poration = $this->get_node_level($super['id']);
             }
         }
         $result = M('users')->add($data);
@@ -64,8 +64,12 @@ class RegisterController extends CommonController
             echo api_json(null,$code,D('Error')->getText($code));exit();
         }
         $code = '200';
-        if(isset($poration) && $poration){
-            $this->node_reward($super,$poration);
+        if(isset($super) && $super){
+            $poration = $this->get_node_level($super['id']);
+            if($poration){
+                $this->node_reward($super,$poration);
+            }
+
         }
         echo api_json(1,$code,D('Error')->getText($code));
     }
