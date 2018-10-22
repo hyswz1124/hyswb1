@@ -135,9 +135,9 @@ class LevelController extends CommonController{
         $model = M('game');
         $model->startTrans();
         //更新收益
-        $all = round($all, 4);
+        $all = round($all, 2);
         $up['all_earnings'] = $all;
-        $up['govern_earnings'] = round($all*0.2, 4);
+        $up['govern_earnings'] = round($all*0.2, 2);
         $up['frozen_earnings'] = $all-$up['govern_earnings'];
         $up['update_time'] = datetimenew();
         $up['type'] = 0;
