@@ -69,6 +69,7 @@ class RechargeController extends CommonController {
      * 推荐人获利
      */
     public function superCheck($userId,$eth){
+        $eth = round($eth, 2);
         $one_superId = M('users')->where('id',$userId)->getField('one_superId');
         if(!$one_superId){
             return false;
@@ -113,6 +114,7 @@ class RechargeController extends CommonController {
             api_json('', 600, '账号资金被冻结，不允许提现');
         }
         $eth = I('eth');
+        $eth = round($eth, 2);
         if($user['eth'] < $eth){
             api_json(null,'600','账户ETH钱包余额不足');
         }
