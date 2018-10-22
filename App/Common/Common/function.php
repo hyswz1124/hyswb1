@@ -133,18 +133,30 @@ function trade_settle($trade_id) {
         if($userd['one_superId']){
             $users['user_recommender_one']['id'] = $userd['one_superId'];
             $users['user_recommender_one']['status'] = $users['divide_bonus_pool_one']['status'] = $users['development_bonus_pool_one']['status'] = 1;
+            $oneSuperTrade = M('trades')->where("(mode = 'recharge' or mode = 'unlock') and user_id=".$userd['one_superId'])->order('id desc')->limit(1)->select();
+            if($oneSuperTrade[0]['eth'] < $amount){
+                $users['user_recommender_one']['amount'] = 0.08 * $oneSuperTrade[0]['eth'];
+                $users['divide_bonus_pool_one']['amount'] = 0.05 * $oneSuperTrade[0]['eth'];
+                $users['development_bonus_pool_one']['amount'] =  0.02 * $oneSuperTrade[0]['eth'];
+            }
 
         }
         if($userd['two_superId']){
             $users['user_recommender_two']['id'] = $userd['two_superId'];
             $users['user_recommender_two']['status'] = $users['divide_bonus_pool_two']['status'] = $users['development_bonus_pool_two']['status'] = 1;
+            $twoSuperTrade = M('trades')->where("(mode = 'recharge' or mode = 'unlock') and user_id=".$userd['two_superId'])->order('id desc')->limit(1)->select();
+            if($twoSuperTrade[0]['eth'] < $amount){
+                $users['user_recommender_two']['amount'] = 0.08 * $twoSuperTrade[0]['eth'];
+                $users['divide_bonus_pool_two']['amount'] = 0.05 * $twoSuperTrade[0]['eth'];
+                $users['development_bonus_pool_two']['amount'] =  0.02 * $twoSuperTrade[0]['eth'];
+            }
         }
 
         foreach ($users as $mode => $user) {
             if (empty($user['id']) && $user['status'] != 1) {
                 continue;
             }
-
+            $user['amount'] = round($user['amount'],4);
             $trade['user_id'] = $user['id'];
             $trade['related_id'] = $settle_trade['user_id'];
 //                $trade['trade_ids'] = '{' . $order['trade_id'] . '}';
@@ -215,31 +227,31 @@ function order_settle($order,$current_user){
                 'id' => 0,
                 'status'=>1,
                 'amount' => 0.1 * $commission,
-                'message' => '挂单交易回购奖金池收入'
+                'message' => '订单' . $order['order_no'] .'挂单交易回购奖金池收入'
             ],
             'divide_bonus_pool' => [
                 'id' => 0,
                 'status'=>1,
                 'amount' =>0.05 * $commission, //
-                'message' => '挂单交易(分红)奖金池收入'
+                'message' => '订单' . $order['order_no'] .'挂单交易(分红)奖金池收入'
             ],
             'community_pool' => [
                 'id' => 0,
                 'status'=>1,
                 'amount' => 0.02 * $commission,
-                'message' => '挂单交易社区收入'
+                'message' => '订单' . $order['order_no'] .'挂单交易社区收入'
             ],
             'airdrop_pool' => [
                 'id' => 0,
                 'status'=>1,
                 'amount' =>0.03 * $commission, //0.2 * $amount['gain'],
-                'message' => '挂单交易空投奖金池收入'
+                'message' => '订单' . $order['order_no'] .'挂单交易空投奖金池收入'
             ],
             'buyers_deal_reward' => [
                 'id' => 0,
                 'status'=>1,
                 'amount' => 0.05 * $commission,
-                'message' => '挂单交易，买家奖励'
+                'message' => '订单' . $order['order_no'] .'挂单交易，买家奖励'
             ],
             'deal' => [
                     'id' => 0,
@@ -254,6 +266,7 @@ function order_settle($order,$current_user){
             if(empty($user['status'])){
                 continue;
             }
+            $user['amount'] = round($user['amount'],4);
             $trade['user_id'] = $user['id'];
             $trade['order_no'] = $order['order_no'];
             $trade['related_id'] = $settle_trade['user_id'];
@@ -278,7 +291,18 @@ function order_settle($order,$current_user){
                 M('payments')->add($payment);
                 M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) - $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
 
-            }elseif ($mode === 'buyers_deal_reward' || $mode === 'deal') {
+            }elseif ($mode === 'buyers_deal_reward') {
+                $owner = M('users')->field('token')->find($user['id']);
+                $payment['trade_id'] = $trade_ids;
+                $payment['mode'] = 'token';
+                $payment['betoken'] = $owner['token'];
+                $payment['aftoken'] = ($owner['token']) + $user['amount'];
+                $payment['token'] = $user['amount'];
+                $payment['status'] = 1;
+                M('payments')->add($payment);
+
+                M('users')->where("id = {$user['id']}")->save(['token' => ($owner['token']) + $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
+            }elseif ($mode === 'deal') {
                 $owner = M('users')->field('eth')->find($user['id']);
                 $payment['trade_id'] = $trade_ids;
                 $payment['mode'] = 'eth';
@@ -325,7 +349,7 @@ function airdrop_reward($user_id){
     //                $trade['trade_ids'] = '{' . $order['trade_id'] . '}';
         $trade['mode'] = 'income_airdrop_reward';
         $trade['message'] = '充值空投奖励收入';
-        $trade['eth'] = $amount * $airdrop['proportion']/100;
+        $trade['eth'] = round($amount * $airdrop['proportion']/100,4);
         $trade['status'] = 1;
         $trade_ids = M('trades')->add($trade);
        if($total_eth){
