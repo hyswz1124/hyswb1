@@ -22,6 +22,7 @@ class RechargeController extends CommonController {
      */
     public function unlocking(){
         $user = $this->userInfo;
+        $type = I('type',1,'int');
         if($user['is_js']){
             api_json('', 600, '该功能已经解锁');
         }
@@ -35,7 +36,7 @@ class RechargeController extends CommonController {
                 'user_id' => $user['id'],
                 'mode' => 'unlock',
                 'related_id' => $this->systemId,
-                'message' => '用户解锁邀请码',
+                'message' => ($type == 1)?'用户解锁邀请码':'用户解锁游戏',
                 'status' => 1,
                 'eth' => $eth
             ];
@@ -50,9 +51,13 @@ class RechargeController extends CommonController {
             ];
            $payment_id = M('payments')->add($payment);
             if ($trade_id && $payment_id) {
-                $code = $this->initcode();
                 $this->superCheck($user['id'],$eth);
-                $rs = M('users')->where('id='.$user['id'])->save(['is_js'=>1,'code'=> $code,'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
+                if(!$user['code']){
+                    $code = $this->initcode();
+                    $rs = M('users')->where('id='.$user['id'])->save(['is_js'=>1,'code'=> $code,'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
+                }else{
+                    $rs = M('users')->where('id='.$user['id'])->save(['is_js'=>1,'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
+                }
                 if($rs === false){
                     $model->rollback();
                     api_json(null,'500','解锁失败');
