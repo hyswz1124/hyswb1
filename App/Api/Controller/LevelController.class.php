@@ -33,7 +33,7 @@ class LevelController extends CommonController{
         if(!$data){
             api_json('', 400, ' 参数错误');
         }
-        if(!$user['is_jsgame']){
+        if(!$user['is_js']){
             api_json('', 400, '需要先解锁游戏功能');
         }
         $model->startTrans();
@@ -149,7 +149,7 @@ class LevelController extends CommonController{
             $upuser['all_earnings'] = $user['all_earnings'] + $all;
             $upuser['govern_earnings'] = 0;
             $upuser['frozen_earnings'] = 0;
-            $upuser['is_jsgame'] = 0;//关闭游戏功能，需再次解锁
+            $upuser['is_js'] = 0;//关闭游戏功能，需再次解锁
             $upuser['super_token'] = $user['super_token'] + $all;
 
             $up['type'] = 1;
