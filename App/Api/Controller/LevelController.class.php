@@ -120,41 +120,49 @@ class LevelController extends CommonController{
         if($data['type']){
             api_json('', 400, '游戏已结束');
         }
-        //计算收益
+        //计算本局收益
         $start_time = $data['start_time'];
         $times=strtotime(datetimenew())-strtotime($start_time);
         $timei=round($times/60/60);
         $level = M('level')->find($data['level_id']);
         $all = $level['super_token'] * 1 / 100 * $timei / 24;
         $is_end = $level['super_token'] * 2.5;
-        //收益大于等于2.5倍，强制结束游戏
-        if($all >= $is_end){
+        //不可支配收益+本局总收益 大于等于2.5倍，强制结束游戏
+        $is_dy = 0;
+        if($all + $user['frozen_earnings'] >= $is_end){
             $all = $is_end;
             $over = 1;
+            $is_dy = 1;
         }
         $model = M('game');
         $model->startTrans();
         //更新收益
         $all = round($all, 2);
-        $up['all_earnings'] = $all;
-        $up['govern_earnings'] = round($all*0.2, 2);
-        $up['frozen_earnings'] = $all-$up['govern_earnings'];
+        $up['all_earnings'] = $all;//总收益
+        $up['govern_earnings'] = round($all*0.2, 2);//可支配收益
+        $up['frozen_earnings'] = $all-$up['govern_earnings'];//不可支配收益
         $up['update_time'] = datetimenew();
         $up['type'] = 0;
+        //没结束游戏时收益累加
         $upuser['all_earnings'] = $user['all_earnings'] + $all;
-        $upuser['govern_earnings'] = $up['govern_earnings'];
-        $upuser['frozen_earnings'] = $up['frozen_earnings'];
+        $upuser['govern_earnings'] = $user['govern_earnings'] + $up['govern_earnings'];
+        $upuser['frozen_earnings'] = $user['frozen_earnings'] +$up['frozen_earnings'];
         if($over){
-            //强制结束游戏，解锁所有收益
-            $upuser['all_earnings'] = $user['all_earnings'] + $all;
+            //结束游戏，解锁可支配收益
+//            $upuser['all_earnings'] = $user['all_earnings'] + $all;
             $upuser['govern_earnings'] = 0;
-            $upuser['frozen_earnings'] = 0;
             $upuser['is_js'] = 0;//关闭游戏功能，需再次解锁
-            $upuser['super_token'] = $user['super_token'] + $all;
-
+            $upuser['super_token'] = $user['super_token'] + $up['govern_earnings'];
+            $supertoken = $up['govern_earnings'];//本次收益,结束游戏本次收益为可支配收益
             $up['type'] = 1;
             $up['govern_earnings'] = 0;
-            $up['frozen_earnings'] = 0;
+            //收益大于等于2.5倍，解锁所有收益
+            if($is_dy){
+                $supertoken = $all;//本次收益为2.5倍
+                $up['frozen_earnings'] = 0;
+                $upuser['frozen_earnings'] = 0;
+                $upuser['super_token'] = $user['super_token'] + $supertoken;
+            }
 
             //记录收益
             $trade = [
@@ -164,7 +172,7 @@ class LevelController extends CommonController{
                 'message' => '游戏结束获得收益',
                 'status' => 1,
                 'eth' => 0,
-                'token' => $all,
+                'token' => $supertoken,
                 'create_time' => date('Y-m-d H:i:s', time()),
                 'update_time' => date('Y-m-d H:i:s', time()),
             ];
@@ -178,9 +186,9 @@ class LevelController extends CommonController{
             $payment['beamount'] = $user['eth'];
             $payment['afamount'] = $user['eth'];
             $payment['betoken'] = $user['super_token'] ;
-            $payment['aftoken'] = $user['super_token'] + $all;
+            $payment['aftoken'] = $user['super_token'] + $supertoken;
             $payment['eth'] = 0;
-            $payment['token'] = $all;
+            $payment['token'] = $supertoken;
             $payment['status'] = 1;
             $payment['create_time'] = date('Y-m-d H:i:s', time());
             $payment['update_time'] = date('Y-m-d H:i:s', time());
