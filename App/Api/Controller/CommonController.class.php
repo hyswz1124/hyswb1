@@ -60,7 +60,7 @@ class CommonController extends Controller
         $fhbonus = M('bonus_pool')->where($bonusWhere)->find();
         $data['fhbonus'] = $fhbonus['eth'];
         //查询下一个节点人数
-        $data['lastnum'] = self::get_node_level($data['id']);
+        list($data['newnum'], $data['lastnum']) = self::get_node_level($data['id']);
         //查询是否在游戏
         $gameWhere['uid'] = $data['id'];
         $gameWhere['type'] = 0;
@@ -85,7 +85,7 @@ class CommonController extends Controller
             $poration = 0;
         }
 
-        return $poration-$num;
+        return array($num, $poration-$num );
     }
 
     /**
