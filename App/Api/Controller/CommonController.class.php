@@ -54,7 +54,38 @@ class CommonController extends Controller
                 api_json(null, 110, '用户已被禁用');
             }
         }
+        //查询分红奖金池
+        $bonusWhere['type'] = 1;
+        $bonusWhere['status'] = 0;
+        $fhbonus = M('bonus_pool')->where($bonusWhere)->find();
+        $data['fhbonus'] = $fhbonus['eth'];
+        //查询下一个节点人数
+        $data['lastnum'] = self::get_node_level($data['id']);
+        //查询是否在游戏
+        $gameWhere['uid'] = $data['id'];
+        $gameWhere['type'] = 0;
+        $gameid = M('game')->where($gameWhere)->find();
+        if(!$gameid['id']){
+            $gameid['id'] = 0;
+        }
+        $data['gameid'] = $gameid['id'];
         return $data;
+    }
+
+    /**
+     * 获取节点人数
+     *
+     */
+    public function get_node_level($super_id){
+        $num = M('users')->where('one_superId='.$super_id)->count();
+        $node = M('node_pool_dispose')->where("status = 1 and type = 0  and num > {$num}")->find();
+        if($node && $node['num']){
+            $poration = $node['num'];
+        }else{
+            $poration = 0;
+        }
+
+        return $poration-$num;
     }
 
     /**
