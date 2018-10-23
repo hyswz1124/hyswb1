@@ -157,48 +157,48 @@ class RechargeController extends CommonController {
     /**
      * 用户解锁游戏
      */
-    public function ungame(){
-        $user = $this->userInfo;
-        if($user['is_jsgame']){
-            api_json('', 600, '该功能已经解锁');
-        }
-        $eth = 0.02;
-        if($user['eth'] < $eth){
-            api_json(null,'600','账户ETH钱包余额不足');
-        }
-        $model = M('trades');
-        $model->startTrans();
-            $trade = [
-                'user_id' => $user['id'],
-                'mode' => 'unlock',
-                'related_id' => $this->systemId,
-                'message' => '用户解锁游戏',
-                'status' => 1,
-                'eth' => $eth
-            ];
-            $trade_id = M('trades')->add($trade);
-            $payment = [
-                'trade_id' => $trade_id,
-                'mode' => 'balance',
-                'eth' => $eth,
-                'beamount' => $user['eth'],
-                'afamount' => $user['eth'] + $eth,
-                'status' => 1
-            ];
-           $payment_id = M('payments')->add($payment);
-            if ($trade_id && $payment_id) {
-                $rs = M('users')->where('id='.$user['id'])->save(['is_jsgame'=>1, 'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
-                if($rs === false){
-                    $model->rollback();
-                    api_json(null,'500','解锁失败');
-                }
-                $model->commit();
-                api_json(1,'200','解锁成功');
-            }else{
-                $model->rollback();
-                api_json(null,'500','解锁失败');
-            }
-    }
+//    public function ungame(){
+//        $user = $this->userInfo;
+//        if($user['is_jsgame']){
+//            api_json('', 600, '该功能已经解锁');
+//        }
+//        $eth = 0.02;
+//        if($user['eth'] < $eth){
+//            api_json(null,'600','账户ETH钱包余额不足');
+//        }
+//        $model = M('trades');
+//        $model->startTrans();
+//            $trade = [
+//                'user_id' => $user['id'],
+//                'mode' => 'unlock',
+//                'related_id' => $this->systemId,
+//                'message' => '用户解锁游戏',
+//                'status' => 1,
+//                'eth' => $eth
+//            ];
+//            $trade_id = M('trades')->add($trade);
+//            $payment = [
+//                'trade_id' => $trade_id,
+//                'mode' => 'balance',
+//                'eth' => $eth,
+//                'beamount' => $user['eth'],
+//                'afamount' => $user['eth'] + $eth,
+//                'status' => 1
+//            ];
+//           $payment_id = M('payments')->add($payment);
+//            if ($trade_id && $payment_id) {
+//                $rs = M('users')->where('id='.$user['id'])->save(['is_jsgame'=>1, 'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
+//                if($rs === false){
+//                    $model->rollback();
+//                    api_json(null,'500','解锁失败');
+//                }
+//                $model->commit();
+//                api_json(1,'200','解锁成功');
+//            }else{
+//                $model->rollback();
+//                api_json(null,'500','解锁失败');
+//            }
+//    }
 
 
     /**
