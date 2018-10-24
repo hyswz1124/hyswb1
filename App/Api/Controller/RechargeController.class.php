@@ -51,9 +51,9 @@ class RechargeController extends CommonController {
             ];
            $payment_id = M('payments')->add($payment);
             if ($trade_id && $payment_id) {
+                $this->superCheck($user['id'],$eth);
                 if(!$user['code']){
                     $code = $this->initcode();
-                    $this->superCheck($user['id'],$eth);
                     $rs = M('users')->where('id='.$user['id'])->save(['is_js'=>1,'code'=> $code,'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
                 }else{
                     $code = $user['code'];
