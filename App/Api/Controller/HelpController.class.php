@@ -18,11 +18,12 @@ class HelpController extends CommonController
     }
 
 
-//    public function helpCenter(){
-//
-//        $data = M('help')->where('type=2')->field('content,content_details')->select();
-////        dd($data);
-//        echo  json_encode(htmldecode($data), JSON_UNESCAPED_UNICODE);exit;
-//        api_json($data, 200, '成功');
-//    }
+    public function helpCenter(){
+
+        $data = M('help')->where('type=2')->field('content,content_details')->select();
+        foreach ($data as &$value){
+            $value['content_details'] = base64_encode($value['content_details']);
+        }
+        api_json($data, 200, '成功');
+    }
 }
