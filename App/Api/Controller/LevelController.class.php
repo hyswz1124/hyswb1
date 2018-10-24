@@ -215,6 +215,8 @@ class LevelController extends CommonController{
 
 
     public function buySuperToken(){
+        return false;
+        exit(1);
         $user = $this->checkLogin();
         if($user['is_freeze']){
             api_json('', 100, '账号资金被冻结，不允许交易');
