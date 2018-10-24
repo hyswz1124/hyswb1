@@ -56,6 +56,7 @@ class RechargeController extends CommonController {
                     $this->superCheck($user['id'],$eth);
                     $rs = M('users')->where('id='.$user['id'])->save(['is_js'=>1,'code'=> $code,'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
                 }else{
+                    $code = $user['code'];
                     $rs = M('users')->where('id='.$user['id'])->save(['is_js'=>1,'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
                 }
                 if($rs === false){
