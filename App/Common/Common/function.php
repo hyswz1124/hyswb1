@@ -214,7 +214,7 @@ function order_settle($order,$current_user){
         return ['status' => 'no', 'data' => '订单结算失败'];
     }
     $amount = $order['eth'];
-    $commission = $amount * 0.25;
+    $commission = $amount;
     if($settle_trade['mode'] == 'list_deal'){
         $users = [
             'buyers_deal' => [
@@ -222,6 +222,12 @@ function order_settle($order,$current_user){
                 'status'=>1,
                 'amount' => $amount,
                 'message' => '挂单'.$order['order_no'].'购买扣款'
+            ],
+            'buyers_deal_token' => [
+                'id' => 0,
+                'status'=>1,
+                'amount' => $order['token'],
+                'message' => '订单' . $order['order_no'] .'购买收入积分'
             ],
             'buy_back_pool' => [
                 'id' => 0,
@@ -291,7 +297,7 @@ function order_settle($order,$current_user){
                 M('payments')->add($payment);
                 M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) - $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
 
-            }elseif ($mode === 'buyers_deal_reward') {
+            }elseif ($mode === 'buyers_deal_reward' || $mode === 'buyers_deal_token') {
                 $owner = M('users')->field('token')->find($user['id']);
                 $payment['trade_id'] = $trade_ids;
                 $payment['mode'] = 'token';
