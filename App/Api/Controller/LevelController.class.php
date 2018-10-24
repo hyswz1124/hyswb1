@@ -126,6 +126,7 @@ class LevelController extends CommonController{
         $timei=round($times/60/60);
         $level = M('level')->find($data['level_id']);
         $all = $level['super_token'] * 1 / 100 * $timei / 24;
+        $all = round($all, 2);
         $is_end = $level['super_token'] * 2.5;
         //不可支配收益+本局总收益 大于等于2.5倍，强制结束游戏
         $is_dy = 0;
@@ -137,7 +138,6 @@ class LevelController extends CommonController{
         $model = M('game');
         $model->startTrans();
         //更新收益
-        $all = round($all, 2);
         $up['all_earnings'] = $all;//总收益
         $up['govern_earnings'] = round($all*0.2, 2);//可支配收益
         $up['frozen_earnings'] = $all-$up['govern_earnings'];//不可支配收益
