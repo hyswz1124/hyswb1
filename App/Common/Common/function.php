@@ -191,6 +191,7 @@ function trade_settle($trade_id) {
         $payment['status'] = 1;
         M('payments')->add($payment);
         M('users')->where("id = {$settle_trade['user_id']}")->setInc('eth',$amount);
+        M('users')->where("id = {$settle_trade['user_id']}")->setInc('all_eth',$amount);
     }
 
     M('trades')->where("id  = {$trade_id}")->save(['status' => 1, 'update_time' => date('Y-m-d H:i:s',time())]);

@@ -51,9 +51,9 @@ class RechargeController extends CommonController {
             ];
            $payment_id = M('payments')->add($payment);
             if ($trade_id && $payment_id) {
-                $this->superCheck($user['id'],$eth);
                 if(!$user['code']){
                     $code = $this->initcode();
+                    $this->superCheck($user['id'],$eth);
                     $rs = M('users')->where('id='.$user['id'])->save(['is_js'=>1,'code'=> $code,'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
                 }else{
                     $rs = M('users')->where('id='.$user['id'])->save(['is_js'=>1,'eth'=>$user['eth']-$eth,'update_time' => date('Y-m-d H:i:s', time())]);
@@ -102,7 +102,7 @@ class RechargeController extends CommonController {
         ];
         $payment_id_super = M('payments')->add($paymentSuper);
         if($trade_id_super && $payment_id_super){
-            M('users')->where('id='.$one_superId)->save(['eth'=>$one_super['eth']+$eth,'update_time' => date('Y-m-d H:i:s', time())]);
+            M('users')->where('id='.$one_superId)->save(['eth'=>$one_super['eth']+$eth,'invite_earnings'=>$one_super['invite_earnings']+$eth,'update_time' => date('Y-m-d H:i:s', time())]);
         }
         return true;
 
