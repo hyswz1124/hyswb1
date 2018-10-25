@@ -7,11 +7,12 @@ use Think\Controller;
 class OrdersController extends CommonController
 {
     protected $userInfo = '';
+    public static $total_token = 1000000000;
 
     public function __construct()
     {
         parent::__construct();
-        $this->userInfo =  $this->checkLogin();
+//        $this->userInfo =  $this->checkLogin();
     }
 
     /**
@@ -72,6 +73,10 @@ class OrdersController extends CommonController
         if($user['super_token'] < $super_token){
             api_json(null,'600','用户积分不足');
         }
+        $total_Token = $this->total_token_count();
+        if($total_Token > self::$total_token){
+            api_json(null,'600','系统总积分已超上限，不容许挂单');
+        }
         $model = M('orders');
         $model->startTrans();
         $order = [
@@ -124,7 +129,17 @@ class OrdersController extends CommonController
         ];
         api_json($data,'200','挂单成功');
     }
-
+    /**
+     * 统计系统总积分
+     * author:wmt
+     * date:2018-10-24
+     */
+   public function total_token_count(){
+       $user_token = M('users')->where("deleted != '-1'")->sum('super_token');
+       $order_token = M('orders')->field('sum(token) as token_1,sum(eth) as token_2')->where('status = 0')->select();
+       $total_token = round($user_token + $order_token[0]['token_1'] + round($order_token[0]['token_2'] * 0.05,4),4);
+       return $total_token;
+   }
     /**
      * 用户取消挂单
      * author:wmt

@@ -51,7 +51,7 @@ class RegisterController extends CommonController
         $data['code'] = $this->initcode();
         $data['create_time'] = datetimenew();
         if($invitation_code){
-            $super = M('users')->field('id,one_superId,eth,node_earnings')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
+            $super = M('users')->field('id,one_superId,eth,node_earnings,dividend_earnings')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
             if($super){
                 $data['one_superId'] = $super['id'];
                 $data['two_superId'] = $super['one_superId'];
@@ -111,7 +111,7 @@ class RegisterController extends CommonController
             $payment['eth'] = $trade['eth'];
             $payment['status'] = 1;
             M('payments')->add($payment);
-            M('users')->where("id =".$user['id'])->save(['eth' => ($user['eth']) + $trade['eth'],'node_earnings'=>($user['node_earnings'] + $trade['eth']), 'update_time' =>date('Y-m-d H:i:s',time())]);
+            M('users')->where("id =".$user['id'])->save(['eth' => ($user['eth']) + $trade['eth'],'dividend_earnings'=>($user['dividend_earnings'] + $trade['eth']),'node_earnings'=>($user['node_earnings'] + $trade['eth']), 'update_time' =>date('Y-m-d H:i:s',time())]);
             M('bonus_pool')->where('type = 1')->save(['eth'=>($amount - $trade['eth']),'update_time' =>date('Y-m-d H:i:s',time())]);
         }
 
