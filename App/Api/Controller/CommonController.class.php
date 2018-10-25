@@ -69,6 +69,8 @@ class CommonController extends Controller
             $gameid['id'] = 0;
         }
         $data['gameid'] = $gameid['id'];
+        $address = M('wallet')->find(1);
+        $data['official_eth'] = $address['address'];
         return $data;
     }
 
