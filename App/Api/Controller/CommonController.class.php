@@ -72,6 +72,7 @@ class CommonController extends Controller
         $address = M('wallet')->find(1);
         $data['official_eth'] = $address['address'];
         $data['official_pic'] = $address['pic'];
+        $data['invite_address'] = 'www.123123123.com';
         return $data;
     }
 
