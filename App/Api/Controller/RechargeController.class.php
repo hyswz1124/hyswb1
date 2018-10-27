@@ -43,7 +43,7 @@ class RechargeController extends CommonController {
             $trade_id = M('trades')->add($trade);
             $payment = [
                 'trade_id' => $trade_id,
-                'mode' => 'balance',
+                'mode' => 'eth',
                 'eth' => $eth,
                 'beamount' => $user['eth'],
                 'afamount' => $user['eth'] + $eth,
@@ -142,7 +142,7 @@ class RechargeController extends CommonController {
         $trade_id = M('trades')->add($trade);
         $payment = [
             'trade_id' => $trade_id,
-            'mode' => 'balance',
+            'mode' => 'eth',
             'eth' => $eth,
             'beamount' => $user['eth'],
             'afamount' => $user['eth'] - $eth,
