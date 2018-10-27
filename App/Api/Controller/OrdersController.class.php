@@ -206,10 +206,15 @@ class OrdersController extends CommonController
      * date:2018-10-12
      */
     public function deal_list(){
+        $user = $this->userInfo;
+        $type = I('type',1,'int');
         $where = [
             'a.mode'=>'list_deal',
             'c.status'=>0
         ];
+        if($type == 2){
+            $where['a.user_id'] = $user['id'];
+        }
         $page = I('page',1,'int');
         $limit = min(30, I('limit',10,'int'));
         $data = M('trades a')->field('b.nickname,b.mphone,b.email,c.order_no,c.eth,c.token,c.create_time')->join('yt_users b on b.id = a.user_id')->join('yt_orders c on a.order_no = c.order_no')->where($where)->limit($limit*($page-1), $limit)->order("c.id desc")->select();

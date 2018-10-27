@@ -120,9 +120,15 @@ class RechargeController extends CommonController {
             api_json('', 600, '账号资金被冻结，不允许提现');
         }
         $eth = I('eth');
-        $eth = round($eth, 2);
+        $eth = round($eth, 4);
+        if(!$eth){
+            api_json(null,'300','提现eth额度不能为空');
+        }
         if($user['eth'] < $eth){
             api_json(null,'600','账户ETH钱包余额不足');
+        }
+        if(!$user['eth_address']){
+            api_json(null,'600','ETH地址为空,请先填写eth地址');
         }
         M('trades')->startTrans();
         $trade = [
