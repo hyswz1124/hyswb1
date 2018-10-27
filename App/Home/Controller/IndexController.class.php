@@ -7,7 +7,7 @@ class IndexController extends Controller
 {
     public function index()
     {
-        var_dump(223);exit();
+        var_dump(224);exit();
         $rec = $this->think_send_mail('1140977015@qq.com','wmt','你是sb','你是sb！');
         var_dump($rec);
 //        $this->display('index');
