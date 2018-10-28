@@ -151,7 +151,7 @@ class LevelController extends CommonController{
             //结束游戏，解锁可支配收益
 //            $upuser['all_earnings'] = $user['all_earnings'] + $all;
             $upuser['govern_earnings'] = 0;
-            $upuser['is_js'] = 0;//关闭游戏功能，需再次解锁
+//            $upuser['is_js'] = 0;//关闭游戏功能，需再次解锁
             $upuser['super_token'] = $user['super_token'] + $up['govern_earnings'];
             $supertoken = $up['govern_earnings'];//本次收益,结束游戏本次收益为可支配收益
             $up['type'] = 1;
