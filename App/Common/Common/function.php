@@ -267,7 +267,7 @@ function order_settle($order,$current_user){
                     'message' => '订单' . $order['order_no'] . '收益'
                 ]
         ];
-        $users['buyers_deal_reward']['id'] = $users['buyers_deal']['id'] = $current_user['id'];
+        $users['buyers_deal_reward']['id'] = $users['buyers_deal']['id'] = $users['buyers_deal_token']['id'] = $current_user['id'];
         $users['deal']['id'] = $order['user_id'];
         foreach($users as $mode=>$user){
             if(empty($user['status'])){
@@ -284,7 +284,12 @@ function order_settle($order,$current_user){
                 $trade['mode'] = 'income_' . $mode;
             }
             $trade['message'] = $user['message'];
-            $trade['eth'] = $user['amount'];
+            if($mode === 'buyers_deal_reward' || $mode === 'buyers_deal_token'){
+                $trade['token'] = $user['amount'];
+            }else{
+                $trade['eth'] = $user['amount'];
+            }
+
             $trade['status'] = 1;
             $trade_ids = M('trades')->add($trade);
             if($mode === 'buyers_deal'){
