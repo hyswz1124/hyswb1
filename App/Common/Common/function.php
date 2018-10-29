@@ -304,7 +304,7 @@ function order_settle($order,$current_user){
                 M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) - $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
 
             }elseif ($mode === 'buyers_deal_reward' || $mode === 'buyers_deal_token') {
-                $owner = M('users')->field('token')->find($user['id']);
+                $owner = M('users')->field('super_token')->find($user['id']);
                 $payment['trade_id'] = $trade_ids;
                 $payment['mode'] = 'token';
                 $payment['betoken'] = $owner['token'];
