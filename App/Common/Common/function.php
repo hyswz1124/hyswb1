@@ -307,8 +307,8 @@ function order_settle($order,$current_user){
                 $owner = M('users')->field('super_token')->find($user['id']);
                 $payment['trade_id'] = $trade_ids;
                 $payment['mode'] = 'token';
-                $payment['betoken'] = $owner['token'];
-                $payment['aftoken'] = ($owner['token']) + $user['amount'];
+                $payment['betoken'] = $owner['super_token'];
+                $payment['aftoken'] = ($owner['super_token']) + $user['amount'];
                 $payment['token'] = $user['amount'];
                 $payment['status'] = 1;
                 M('payments')->add($payment);
