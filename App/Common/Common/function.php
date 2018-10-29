@@ -273,6 +273,8 @@ function order_settle($order,$current_user){
             if(empty($user['status'])){
                 continue;
             }
+            $trade = [];
+            $payment = [];
             $user['amount'] = round($user['amount'],4);
             $trade['user_id'] = $user['id'];
             $trade['order_no'] = $order['order_no'];
