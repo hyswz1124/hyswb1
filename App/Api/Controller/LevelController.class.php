@@ -65,7 +65,7 @@ class LevelController extends CommonController{
                 api_json('', 500, '购买失败，请重试');
             }
             $payment['trade_id'] = $trade_id;
-            $payment['mode'] = 'buylevel';
+            $payment['mode'] = 'token';
             $payment['beamount'] = $user['eth'];
             $payment['afamount'] = $user['eth'];
             $payment['betoken'] = $user['super_token'] ;
@@ -182,7 +182,7 @@ class LevelController extends CommonController{
                 api_json('', 500, '获取失败，请重试');
             }
             $payment['trade_id'] = $trade_id;
-            $payment['mode'] = 'gameover';
+            $payment['mode'] = 'token';
             $payment['beamount'] = $user['eth'];
             $payment['afamount'] = $user['eth'];
             $payment['betoken'] = $user['super_token'] ;
