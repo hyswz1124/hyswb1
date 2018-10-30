@@ -125,7 +125,7 @@ class LevelController extends CommonController{
         $times=strtotime(datetimenew())-strtotime($start_time);
         $timei=round($times/60/60);
         $level = M('level')->find($data['level_id']);
-        $all = $level['super_token'] * 1 / 100 * $timei / 24;
+        $all = $level['super_token'] * $level['earnings'] / 100 * $timei / 24;
         $all = round($all, 2);
         $is_end = $level['super_token'] * 2.5;
         //不可支配收益+本局总收益 大于等于2.5倍，强制结束游戏
