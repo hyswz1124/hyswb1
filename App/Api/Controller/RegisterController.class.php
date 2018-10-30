@@ -48,7 +48,7 @@ class RegisterController extends CommonController
 //            echo api_json(null,'400','手机验证码不正确');exit();
 //        }
         $data['password'] = password_hash($passwd, PASSWORD_DEFAULT);
-        $data['code'] = $this->initcode();
+//        $data['code'] = $this->initcode();
         $data['create_time'] = datetimenew();
         if($invitation_code){
             $super = M('users')->field('id,one_superId,eth,node_earnings,dividend_earnings')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();

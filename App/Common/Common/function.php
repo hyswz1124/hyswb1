@@ -257,7 +257,7 @@ function order_settle($order,$current_user){
             'buyers_deal_reward' => [
                 'id' => 0,
                 'status'=>1,
-                'amount' => 0.05 * $commission,
+                'amount' => 0.05 * $order['token'],
                 'message' => '订单' . $order['order_no'] .'挂单交易，买家奖励'
             ],
             'deal' => [
@@ -267,12 +267,14 @@ function order_settle($order,$current_user){
                     'message' => '订单' . $order['order_no'] . '收益'
                 ]
         ];
-        $users['buyers_deal_reward']['id'] = $users['buyers_deal']['id'] = $current_user['id'];
+        $users['buyers_deal_reward']['id'] = $users['buyers_deal']['id'] = $users['buyers_deal_token']['id'] = $current_user['id'];
         $users['deal']['id'] = $order['user_id'];
         foreach($users as $mode=>$user){
             if(empty($user['status'])){
                 continue;
             }
+            $trade = [];
+            $payment = [];
             $user['amount'] = round($user['amount'],4);
             $trade['user_id'] = $user['id'];
             $trade['order_no'] = $order['order_no'];
@@ -284,7 +286,12 @@ function order_settle($order,$current_user){
                 $trade['mode'] = 'income_' . $mode;
             }
             $trade['message'] = $user['message'];
-            $trade['eth'] = $user['amount'];
+            if($mode === 'buyers_deal_reward' || $mode === 'buyers_deal_token'){
+                $trade['token'] = $user['amount'];
+            }else{
+                $trade['eth'] = $user['amount'];
+            }
+
             $trade['status'] = 1;
             $trade_ids = M('trades')->add($trade);
             if($mode === 'buyers_deal'){
@@ -299,11 +306,11 @@ function order_settle($order,$current_user){
                 M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) - $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
 
             }elseif ($mode === 'buyers_deal_reward' || $mode === 'buyers_deal_token') {
-                $owner = M('users')->field('token')->find($user['id']);
+                $owner = M('users')->field('super_token')->find($user['id']);
                 $payment['trade_id'] = $trade_ids;
                 $payment['mode'] = 'token';
-                $payment['betoken'] = $owner['token'];
-                $payment['aftoken'] = ($owner['token']) + $user['amount'];
+                $payment['betoken'] = $owner['super_token'];
+                $payment['aftoken'] = ($owner['super_token']) + $user['amount'];
                 $payment['token'] = $user['amount'];
                 $payment['status'] = 1;
                 M('payments')->add($payment);
