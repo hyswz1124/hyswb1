@@ -257,7 +257,7 @@ function order_settle($order,$current_user){
             'buyers_deal_reward' => [
                 'id' => 0,
                 'status'=>1,
-                'amount' => 0.05 * $commission,
+                'amount' => 0.05 * $order['token'],
                 'message' => '订单' . $order['order_no'] .'挂单交易，买家奖励'
             ],
             'deal' => [
