@@ -75,8 +75,8 @@ class RechargeController extends CommonController {
      * 推荐人获利
      */
     public function superCheck($userId,$eth){
-        $eth = round($eth, 2);
-        $one_superId = M('users')->where('id',$userId)->getField('one_superId');
+        $eth = round($eth, 4);
+        $one_superId = M('users')->where('id='.$userId)->getField('one_superId');
         if(!$one_superId){
             return false;
         }
