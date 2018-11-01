@@ -13,6 +13,9 @@ class GoogleAuthController extends CommonController
     public function index(){
         $googleAuthenticator = new GoogleAuthenticatorModel();
         $user = I('phone');
+        if(!$user){
+            echo api_json(null,'400','手机号码不能为空');exit();
+        }
         if(!preg_match('/1[0-9]{10}/', $user) || strlen($user) != 11) {
             echo api_json(null,'400','手机号码格式不正确');exit();
         }
