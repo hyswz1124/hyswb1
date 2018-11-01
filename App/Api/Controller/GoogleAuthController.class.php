@@ -28,7 +28,7 @@ class GoogleAuthController extends CommonController
             $add['phone'] = $user;
             $add['secret'] = $secret;
             $add['create_time'] = datetimenew();
-            $rs = M('yt_google_auth')->add($add);
+            $rs = M('googleAuth')->add($add);
         }
         $qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('ETHCODE', $secret);
         if(!$rs){
