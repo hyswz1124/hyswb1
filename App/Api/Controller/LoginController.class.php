@@ -23,7 +23,7 @@ class LoginController extends CommonController
     public function index(){
         $user = I('user', '', 'trim');
         $pass = I('pwd', '', 'trim');
-        $where['mphone|email'] = $user;
+        $where['mphone|eth_address'] = $user;
         if(!$user or !$pass){
             api_json('', 400, '参数为空');
         }
