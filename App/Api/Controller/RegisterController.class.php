@@ -81,7 +81,7 @@ class RegisterController extends CommonController
          $num = M('users')->where('one_superId='.$super_id)->count();
          $node = M('node_pool_dispose')->where("status = 1 and ((type = 0 and num = {$num}) or (type = 1 and num < {$num}))")->find();
         if($node && $node['proportion']){
-            $poration = $node['poration'];
+            $poration = $node['proportion'];
         }else{
             $poration = 0;
         }
