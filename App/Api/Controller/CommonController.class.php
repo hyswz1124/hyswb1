@@ -1,5 +1,6 @@
 <?php
 namespace Api\Controller;
+use Common\Model\GoogleAuthenticatorModel;
 use Think\Controller;
 
 
@@ -60,7 +61,23 @@ class CommonController extends Controller
         $fhbonus = M('bonus_pool')->where($bonusWhere)->find();
         $data['fhbonus'] = $fhbonus['eth'];
         //查询下一个节点人数
-        list($data['newnum'], $data['lastnum']) = self::get_node_level($data['id']);
+        $node = self::get_node_level($data['id']);
+        $data['newnum'] = $node[0];//现在邀请人数
+        $data['lastnum'] = $node[1];//距离下一节点相差人数
+        $data['lastnum_earnings'] = round($fhbonus['eth'] * $node[2] / 100 * 0.9, 4);//下一节点奖励
+        //google 验证信息
+        $google = M('google_auth')->where('phone='.$data['mphone'])->find();
+        if($google){
+            $googleAuthenticator = new GoogleAuthenticatorModel();
+            $qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('ETHCODE', $google['secret']);
+            $data['google_secret'] = $google['secret'];
+            $data['google_url'] = $qrCodeUrl;
+        }
+        //查询邀请奖金池
+        $bonusWhere['type'] = 1;
+        $bonusWhere['status'] = 0;
+        $fhbonus = M('bonus_pool')->where($bonusWhere)->find();
+//        list($data['newnum'], $data['lastnum']) = self::get_node_level($data['id']);
         //查询是否在游戏
         $gameWhere['uid'] = $data['id'];
         $gameWhere['type'] = 0;
@@ -81,15 +98,19 @@ class CommonController extends Controller
      *
      */
     public function get_node_level($super_id){
+        $max = M('node_pool_dispose')->where('status = 1')->max('num');
         $num = M('users')->where('one_superId='.$super_id)->count();
-        $node = M('node_pool_dispose')->where("status = 1 and type = 0  and num > {$num}")->find();
-        if($node && $node['num']){
+        $node = M('node_pool_dispose')->where("status = 1 and num > {$num}")->find();
+        if($node && $node['num'] && $node['proportion']){
+            $proportion = $node['proportion'];
             $poration = $node['num'];
         }else{
             $poration = 0;
         }
-
-        return array($num, $poration-$num );
+        if($num > $max){
+            $proportion = M('node_pool_dispose')->where('status = 1')->max('proportion');
+        }
+        return array($num, $poration-$num, $proportion);
     }
 
     /**

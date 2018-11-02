@@ -1,6 +1,7 @@
 <?php
 
 namespace Api\Controller;
+use Common\Model\GoogleAuthenticatorModel;
 use Think\Controller;
 
 class RechargeController extends CommonController {
@@ -121,8 +122,19 @@ class RechargeController extends CommonController {
         }
         $eth = I('eth');
         $eth = round($eth, 4);
+        $code= I('code');
         if(!$eth){
             api_json(null,'300','提现eth额度不能为空');
+        }
+        if(!$code){
+            api_json(null,'400','验证码不能为空');
+        }
+        $secret = M('google_auth')->where('phone='.$user['mphone'])->find();
+        $googleAuthenticator = new GoogleAuthenticatorModel();
+//        $oneCode = $googleAuthenticator->getCode($secret['secret']);
+        $checkResult = $googleAuthenticator->verifyCode($secret['secret'], $code, 2);    // 2 = 2*30sec clock tolerance
+        if (!$checkResult) {
+            api_json(null,'400','验证码错误');
         }
         if($user['eth'] < $eth){
             api_json(null,'600','账户ETH钱包余额不足');

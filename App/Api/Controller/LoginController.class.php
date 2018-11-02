@@ -52,9 +52,11 @@ class LoginController extends CommonController
         if(!$data){
             api_json('', 400, '用户不存在或者已被禁用');
         }
-        $row=password_verify($pass,$data['password']);
-        if(!$row){
-            api_json('', 400, '密码错误');
+        if(!$code){
+            $row=password_verify($pass,$data['password']);
+            if(!$row){
+                api_json('', 400, '密码错误');
+            }
         }
         $token  = $this->inittoken();
         $up['token'] = $token;

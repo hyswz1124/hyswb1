@@ -31,9 +31,11 @@ class GoogleAuthController extends CommonController
             $rs = M('googleAuth')->add($add);
         }
         $qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('ETHCODE', $secret);
+        $data['secret'] = $secret;
+        $data['url'] = $qrCodeUrl;
         if(!$rs){
             api_json('', 500, '获取失败，请重试');
         }
-        api_json($qrCodeUrl, 200, '获取成功');
+        api_json($data, 200, '获取成功');
     }
 }

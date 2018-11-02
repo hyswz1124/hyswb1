@@ -37,8 +37,24 @@ class LevelController extends CommonController{
             api_json('', 400, '需要先解锁游戏功能');
         }
         $model->startTrans();
+        $isjl = false;
+        $is = M('game')->where('uid='.$user['id'])->order('id desc')->find();
+        if($is){
+            if($is['level_id'] > $level){
+                api_json('', 400, '不能购买低级别游戏');
+            }
+            if($is['level_id'] < $level){
+                if($user['one_superId']){
+                    if($user['super_token'] < $data['super_token'] * 1.1){
+                        api_json('', 400, '积分不足,请先兑换');
+                    }
+                    $isjl = true;
+                }
+
+            }
+        }
         if($user['super_token'] < $data['super_token']){
-            api_json('', 400, '积分不足,请兑换');
+            api_json('', 400, '积分不足,请先兑换');
         }else{
             $is_game_where['uid'] = $user['id'];
             $is_game_where['type'] = 0;
@@ -90,6 +106,43 @@ class LevelController extends CommonController{
                 $model->rollback();
                 api_json('', 500, '购买失败，请重试');
             }
+            //邀请人获取奖励
+            if($isjl){
+                $trade = [
+                    'user_id' => $user['one_superId'],
+                    'mode' => 'lastbuylevel',
+                    'related_id' => $this->systemId,
+                    'message' => '下级邀请人'.$user['id'].'购买'.$data['name'].'级别游戏获得奖励',
+                    'status' => 1,
+                    'eth' => 0,
+                    'token' => $data['super_token'] * 0.1,
+                    'create_time' => date('Y-m-d H:i:s', time()),
+                    'update_time' => date('Y-m-d H:i:s', time()),
+                ];
+                $trade_id = M('trades')->add($trade);
+                if(!$trade_id){
+                    $model->rollback();
+                    api_json('', 500, '购买失败，请重试');
+                }
+                $super = M('users')->find($user['one_superId']);
+                $payment['trade_id'] = $trade_id;
+                $payment['mode'] = 'token';
+                $payment['beamount'] = $super['eth'];
+                $payment['afamount'] = $super['eth'];
+                $payment['betoken'] = $super['super_token'] ;
+                $payment['aftoken'] = $super['super_token'] + ($data['super_token'] * 0.1);
+                $payment['eth'] = 0;
+                $payment['token'] = $data['super_token'] * 0.1;
+                $payment['status'] = 1;
+                $payment['create_time'] = date('Y-m-d H:i:s', time());
+                $payment['update_time'] = date('Y-m-d H:i:s', time());
+                $rspay = M('payments')->add($payment);
+                if($rspay === false){
+                    $model->rollback();
+                    api_json('', 500, '购买失败，请重试');
+                }
+            }
+
             $addganme['uid'] = $user['id'];
             $addganme['type'] = 0;
             $addganme['level_id'] = $level;
@@ -210,6 +263,47 @@ class LevelController extends CommonController{
         }
         $model->commit();
         api_json($up, 200, '成功');
+    }
+
+
+    /**
+     * 统计
+     */
+    public function statistics()
+    {
+        $user = $this->checkLogin();
+        $where['mode'] = 'gameover';
+        $where['user_id'] = $user['id'];
+        $where['status'] = 1;
+        $month = date('m', time());
+        for ($i=1; $i<=$month; $i++){
+            $where['create_time'] = array('like', '%' . date('Y-m', strtotime(date('Y-', time()).$i)) . '%');
+            //按月统计
+            $yearArr[date('Y-m', strtotime(date('Y-', time()).$i))] =(double)M('trades')->where($where)->sum('token');
+        }
+        $retuen['year'] = $yearArr;
+        $day = date('d', time());
+        for ($i=1; $i<=$day; $i++){
+            //按天统计
+            $where['create_time'] = array('like', '%' . date('Y-m-d', strtotime(date('Y-m-', time()).$i)) . '%');
+            $monthArr[date('Y-m-d', strtotime(date('Y-m-', time()).$i))] = (double)M('trades')->where($where)->sum('token');
+        }
+        $retuen['month'] = $monthArr;
+
+        $hour = date('H', time());
+        for ($i=0; $i<=$hour; $i++){
+            if($i < 10){
+                $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).'0'.$i . '%');
+            }else{
+                $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).$i . '%');
+            }
+            //当天按小时统计
+            $dayArr[$i] = (double)M('trades')->where($where)->sum('token');
+        }
+        $retuen['day'] = $dayArr;
+
+
+        api_json($retuen, 200, '统计数据');
     }
 
 
