@@ -9,6 +9,8 @@
 namespace Api\Controller;
 
 
+use Common\Model\GoogleAuthenticatorModel;
+
 class LoginController extends CommonController
 {
 
@@ -23,10 +25,25 @@ class LoginController extends CommonController
     public function index(){
         $user = I('user', '', 'trim');
         $pass = I('pwd', '', 'trim');
-        $where['mphone|email'] = $user;
+        $code = I('code', '', 'trim');
+        $where['mphone|eth_address'] = $user;
         if(!$user or !$pass){
             api_json('', 400, '参数为空');
         }
+//        if(!$code){
+//            api_json('', 400, '参数为空');
+//        }
+
+        if($code){
+            $is = M('googleAuth')->where('phone='.$user)->find();
+            $googleAuthenticator = new GoogleAuthenticatorModel();
+            $oneCode = $googleAuthenticator->getCode($is['secret']);
+            $checkResult = $googleAuthenticator->verifyCode($is['secret'], $code, 2);    // 2 = 2*30sec clock tolerance
+            if (!$checkResult) {
+                api_json('', 400, '验证码错误');
+            }
+        }
+
 //        $where['password'] = password_hash($pass, PASSWORD_DEFAULT);
         $where['status'] = 0;
         $where['deleted'] = 0;
