@@ -12,18 +12,18 @@ class GoogleAuthController extends CommonController
 
     public function index(){
         $googleAuthenticator = new GoogleAuthenticatorModel();
-        $user = $this->checkLogin();
+//        $user = $this->checkLogin();
         $secret = $googleAuthenticator->createSecret();
-        $add['uid'] = $user['id'];
-        $add['secret'] = $secret;
-        $add['create_time'] = datetimenew();
-        $rs = M('googleAuth')->add($add);
+//        $add['uid'] = $user['id'];
+//        $add['secret'] = $secret;
+//        $add['create_time'] = datetimenew();
+//        $rs = M('googleAuth')->add($add);
         $qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('ETHCODE', $secret);
         $data['secret'] = $secret;
         $data['url'] = $qrCodeUrl;
-        if(!$rs){
-            api_json('', 500, '获取失败，请重试');
-        }
+//        if(!$rs){
+//            api_json('', 500, '获取失败，请重试');
+//        }
         api_json($data, 200, '获取成功');
     }
 
