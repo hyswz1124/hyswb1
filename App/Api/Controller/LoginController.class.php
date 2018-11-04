@@ -26,7 +26,7 @@ class LoginController extends CommonController
         $user = I('user', '', 'trim');
         $pass = I('pwd', '', 'trim');
         $code = I('code', '', 'trim');
-        $where['mphone|eth_address'] = $user;
+        $where['email|mphone|eth_address'] = $user;
         if(!$user or !$pass){
             api_json('', 400, '参数为空');
         }

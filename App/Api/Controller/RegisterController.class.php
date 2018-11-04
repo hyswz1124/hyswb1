@@ -23,10 +23,11 @@ class RegisterController extends CommonController
 //            echo api_json(null,'300','手机验证码为空');exit();
 //        }
         //过滤匹配
-        if(!preg_match('/1[0-9]{10}/', $user) || strlen($user) != 11) {
-            echo api_json(null,'400','手机号码格式不正确');exit();
+        if(!preg_match('/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/', $user)){
+            $data['user'] = $user;
+            $data['eth_address'] = $user;
         }else{
-            $data['mphone'] = $user;
+            $data['email'] = $user;
         }
 
 //        if (strlen($passwd) < 6 || strlen($passwd) > 20 || $passwd != $checkpwd) {
@@ -35,9 +36,10 @@ class RegisterController extends CommonController
 //        if (mb_strlen($name, 'UTF8') < 2 || mb_strlen($name, 'UTF8') > 20) {
 //            echo api_json(null,'400','用户名长度不符');exit();
 //        }
-        $user = M('users')->where("mphone='{$user}' ")->find();
+        $iswhere['email|mphone|eth_address'] = $user;
+        $user = M('users')->where($iswhere)->find();
         if($user){
-            echo api_json(null,'400','手机号已注册');exit();
+            echo api_json(null,'400','该地址已注册');exit();
         }
 //       $phone_codes = get_code($phone);
 //        if(!$phone_codes || ($phone_code != $phone_codes)){

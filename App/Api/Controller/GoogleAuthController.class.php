@@ -12,24 +12,12 @@ class GoogleAuthController extends CommonController
 
     public function index(){
         $googleAuthenticator = new GoogleAuthenticatorModel();
-        $user = I('phone');
-        if(!$user){
-            echo api_json(null,'400','手机号码不能为空');exit();
-        }
-        if(!preg_match('/1[0-9]{10}/', $user) || strlen($user) != 11) {
-            echo api_json(null,'400','手机号码格式不正确');exit();
-        }
-        $is = M('googleAuth')->where('phone='.$user)->find();
-        $rs = true;
-        if($is){
-            $secret = $is['secret'];
-        }else{
-            $secret = $googleAuthenticator->createSecret();
-            $add['phone'] = $user;
-            $add['secret'] = $secret;
-            $add['create_time'] = datetimenew();
-            $rs = M('googleAuth')->add($add);
-        }
+        $user = $this->checkLogin();
+        $secret = $googleAuthenticator->createSecret();
+        $add['uid'] = $user['id'];
+        $add['secret'] = $secret;
+        $add['create_time'] = datetimenew();
+        $rs = M('googleAuth')->add($add);
         $qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('ETHCODE', $secret);
         $data['secret'] = $secret;
         $data['url'] = $qrCodeUrl;
@@ -37,5 +25,25 @@ class GoogleAuthController extends CommonController
             api_json('', 500, '获取失败，请重试');
         }
         api_json($data, 200, '获取成功');
+    }
+
+    public function setAuth(){
+        $user = $this->checkLogin();
+        $code = I('code', '', 'trim');
+        $secret = I('secret', '', 'trim');
+        if(!$code or !$secret){
+            api_json('', 400, '参数为空');
+        }
+        $googleAuthenticator = new GoogleAuthenticatorModel();
+        $checkResult = $googleAuthenticator->verifyCode($secret, $code, 2);    // 2 = 2*30sec clock tolerance
+        if (!$checkResult) {
+            api_json('', 400, '验证码跟秘钥不匹配');
+        }
+        $up['secret'] = $secret;
+        $rs = M('users')->where('id='.$user['id'])->save($up);
+        if($rs === false){
+            api_json('', 500, '绑定失败，请重试');
+        }
+        api_json('', 200, '成功');
     }
 }
