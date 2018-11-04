@@ -46,7 +46,7 @@ class CommonController extends Controller
             api_json(null, 108, '缺少 token');
         }
         $where['token'] = $token;
-        $field = 'id, nickname, code, mphone, email, is_js, is_freeze,  token, super_token, eth, eth_address, all_earnings,all_token, all_eth, dynamic_earnings, dividend_earnings, node_earnings, paradrop_earnings, invite_earnings, govern_earnings, frozen_earnings';
+        $field = 'id, nickname, code, mphone, secret, email, is_js, is_freeze,  token, super_token, eth, eth_address, all_earnings,all_token, all_eth, dynamic_earnings, dividend_earnings, node_earnings, paradrop_earnings, invite_earnings, govern_earnings, frozen_earnings';
         $data = M('users')->where($where)->field($field)->find();
         if (!$data) {
             api_json(null, 109, 'token错误');
@@ -66,11 +66,10 @@ class CommonController extends Controller
         $data['lastnum'] = $node[1];//距离下一节点相差人数
         $data['lastnum_earnings'] = round($fhbonus['eth'] * $node[2] / 100 * 0.9, 4);//下一节点奖励
         //google 验证信息
-        $google = M('google_auth')->where('phone='.$data['mphone'])->find();
-        if($google){
+        if($data['secret']){
             $googleAuthenticator = new GoogleAuthenticatorModel();
-            $qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('ETHCODE', $google['secret']);
-            $data['google_secret'] = $google['secret'];
+            $qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('ETHCODE', $data['secret']);
+            $data['google_secret'] = $data['secret'];
             $data['google_url'] = $qrCodeUrl;
         }
         //查询邀请奖金池
