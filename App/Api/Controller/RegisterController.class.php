@@ -1,6 +1,7 @@
 <?php
 namespace Api\Controller;
 
+use Common\Model\GoogleAuthenticatorModel;
 use Think\Controller;
 
 class RegisterController extends CommonController
@@ -126,9 +127,9 @@ class RegisterController extends CommonController
             $code = '300';
             echo api_json(null,$code,D('Error')->getText($code));exit();
         }
-//        if(empty($phone_code)){
-//            echo api_json(null,'300','手机验证码为空');exit();
-//        }
+        if(empty($phone_code)){
+            echo api_json(null,'300','验证码为空');exit();
+        }
 //        $phone_codes = get_code($phone);
 //        if(!$phone_codes || ($phone_code != $phone_codes)){
 //            echo api_json(null,'400','手机验证码不正确');exit();
@@ -136,9 +137,14 @@ class RegisterController extends CommonController
         if (strlen($passwd) < 6 || strlen($passwd) > 20 || $passwd != $checkpwd) {
             echo api_json(null,'400','密码输入有误');exit();
         }
-        $user = M('users')->where("mphone='{$phone}' or email='{$phone}'")->find();
+        $user = M('users')->where("mphone='{$phone}' or email='{$phone}'  or eth_address='{$phone}' ")->find();
         if(!$user){
-            echo api_json(null,'400','手机号未注册');exit();
+            echo api_json(null,'400','账号不存在');exit();
+        }
+        $googleAuthenticator = new GoogleAuthenticatorModel();
+        $checkResult = $googleAuthenticator->verifyCode($$user['secret'], $phone_code, 2);    // 2 = 2*30sec clock tolerance
+        if (!$checkResult) {
+            api_json('', 400, '验证码跟秘钥不匹配');
         }
         $result = M('users')->where('id='.$user['id'])->save(['password'=>password_hash($passwd, PASSWORD_DEFAULT)]);
         if($result){
