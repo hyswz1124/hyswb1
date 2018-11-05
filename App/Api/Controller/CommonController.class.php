@@ -46,7 +46,7 @@ class CommonController extends Controller
             api_json(null, 108, '缺少 token');
         }
         $where['token'] = $token;
-        $field = 'id, nickname, code, mphone, secret, email, is_js, is_freeze,  token, super_token, eth, eth_address, all_earnings,all_token, all_eth, dynamic_earnings, dividend_earnings, node_earnings, paradrop_earnings, invite_earnings, govern_earnings, frozen_earnings';
+        $field = 'id, nickname,one_superid,two_superid, code, mphone, secret, email, is_js, is_freeze,  token, super_token, eth, eth_address, all_earnings,all_token, all_eth, dynamic_earnings, dividend_earnings, node_earnings, paradrop_earnings, invite_earnings, govern_earnings, frozen_earnings';
         $data = M('users')->where($where)->field($field)->find();
         if (!$data) {
             api_json(null, 109, 'token错误');
@@ -98,7 +98,7 @@ class CommonController extends Controller
      */
     public function get_node_level($super_id){
         $max = M('node_pool_dispose')->where('status = 1')->max('num');
-        $num = M('users')->where('one_superId='.$super_id)->count();
+        $num = M('users')->where('one_superid='.$super_id)->count();
         $node = M('node_pool_dispose')->where("status = 1 and num > {$num}")->find();
         if($node && $node['num'] && $node['proportion']){
             $proportion = $node['proportion'];

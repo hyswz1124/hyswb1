@@ -130,10 +130,10 @@ function trade_settle($trade_id) {
         ];
 
         $userd = M('users')->find($settle_trade['user_id']);
-        if($userd['one_superId']){
-            $users['user_recommender_one']['id'] = $userd['one_superId'];
+        if($userd['one_superid']){
+            $users['user_recommender_one']['id'] = $userd['one_superid'];
             $users['user_recommender_one']['status'] = $users['divide_bonus_pool_one']['status'] = $users['development_bonus_pool_one']['status'] = 1;
-            $oneSuperTrade = M('trades')->where("(mode = 'recharge' or mode = 'unlock') and user_id=".$userd['one_superId'])->order('id desc')->limit(1)->select();
+            $oneSuperTrade = M('trades')->where("(mode = 'recharge' or mode = 'unlock') and user_id=".$userd['one_superid'])->order('id desc')->limit(1)->select();
             if($oneSuperTrade[0]['eth'] < $amount){
                 $users['user_recommender_one']['amount'] = 0.08 * $oneSuperTrade[0]['eth'];
                 $users['divide_bonus_pool_one']['amount'] = 0.05 * $oneSuperTrade[0]['eth'];
@@ -141,10 +141,10 @@ function trade_settle($trade_id) {
             }
 
         }
-        if($userd['two_superId']){
-            $users['user_recommender_two']['id'] = $userd['two_superId'];
+        if($userd['two_superid']){
+            $users['user_recommender_two']['id'] = $userd['two_superid'];
             $users['user_recommender_two']['status'] = $users['divide_bonus_pool_two']['status'] = $users['development_bonus_pool_two']['status'] = 1;
-            $twoSuperTrade = M('trades')->where("(mode = 'recharge' or mode = 'unlock') and user_id=".$userd['two_superId'])->order('id desc')->limit(1)->select();
+            $twoSuperTrade = M('trades')->where("(mode = 'recharge' or mode = 'unlock') and user_id=".$userd['two_superid'])->order('id desc')->limit(1)->select();
             if($twoSuperTrade[0]['eth'] < $amount){
                 $users['user_recommender_two']['amount'] = 0.08 * $twoSuperTrade[0]['eth'];
                 $users['divide_bonus_pool_two']['amount'] = 0.05 * $twoSuperTrade[0]['eth'];

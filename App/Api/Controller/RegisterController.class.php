@@ -50,10 +50,10 @@ class RegisterController extends CommonController
 //        $data['code'] = $this->initcode();
         $data['create_time'] = datetimenew();
         if($invitation_code){
-            $super = M('users')->field('id,one_superId,eth,node_earnings,dividend_earnings')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
+            $super = M('users')->field('id,one_superid,eth,node_earnings,dividend_earnings')->where('code=%d and deleted = 0 and status =0',$invitation_code)->find();
             if($super){
-                $data['one_superId'] = $super['id'];
-                $data['two_superId'] = $super['one_superId'];
+                $data['one_superid'] = $super['id'];
+                $data['two_superid'] = $super['one_superid'];
 //                $poration = $this->get_node_level($super['id']);
             }
         }
@@ -77,7 +77,7 @@ class RegisterController extends CommonController
      *
      */
     public function get_node_level($super_id){
-         $num = M('users')->where('one_superId='.$super_id)->count();
+         $num = M('users')->where('one_superid='.$super_id)->count();
          $node = M('node_pool_dispose')->where("status = 1 and ((type = 0 and num = {$num}) or (type = 1 and num < {$num}))")->find();
         if($node && $node['proportion']){
             $poration = $node['proportion'];

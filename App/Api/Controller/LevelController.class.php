@@ -44,7 +44,7 @@ class LevelController extends CommonController{
                 api_json('', 400, '不能购买低级别游戏');
             }
             if($is['level_id'] < $level){
-                if($user['one_superId']){
+                if($user['one_superid']){
                     if($user['super_token'] < $data['super_token'] * 1.1){
                         api_json('', 400, '积分不足,请先兑换');
                     }
@@ -61,7 +61,7 @@ class LevelController extends CommonController{
             $is_game = M('game')->where($is_game_where)->find();
 
             if($is_game){
-                api_json('', 400, '存在进行中的游戏，不允许购买');
+//                api_json('', 400, '存在进行中的游戏，不允许购买');
             }
 
             $trade = [
@@ -75,6 +75,9 @@ class LevelController extends CommonController{
                 'create_time' => date('Y-m-d H:i:s', time()),
                 'update_time' => date('Y-m-d H:i:s', time()),
             ];
+            if($isjl){
+                $trade['token'] = $data['super_token'] * 1.1;
+            }
             $trade_id = M('trades')->add($trade);
             if(!$trade_id){
                 $model->rollback();
@@ -88,6 +91,10 @@ class LevelController extends CommonController{
             $payment['aftoken'] = $user['super_token'] - $data['super_token'];
             $payment['eth'] = 0;
             $payment['token'] = $data['super_token'];
+            if($isjl){
+                $payment['aftoken'] = $user['super_token'] - ( $data['super_token'] * 1.1 );
+                $payment['token'] = $data['super_token'] * 1.1;
+            }
             $payment['status'] = 1;
             $payment['create_time'] = date('Y-m-d H:i:s', time());
             $payment['update_time'] = date('Y-m-d H:i:s', time());
@@ -96,20 +103,21 @@ class LevelController extends CommonController{
                 $model->rollback();
                 api_json('', 500, '购买失败，请重试');
             }
-            $rs = M('users')->where('id='.$user['id'])->setDec('super_token',$data['super_token']);
-            $rss = M('users')->where('id='.$user['id'])->setInc('all_token',$data['super_token']);
-            if($rs === false){
-                $model->rollback();
-                api_json('', 500, '购买失败，请重试');
+            $userup['super_token'] = $user['super_token'] - $data['super_token'];
+            $userup['all_token'] = $user['all_token'] + $data['super_token'];
+            if($isjl){
+                $userup['super_token'] = $user['super_token'] - ($data['super_token'] * 1.1);
+                $userup['all_token'] = $user['all_token'] + ($data['super_token'] * 1.1);
             }
-            if($rss === false){
+            $rs =  M('users')->where('id='.$user['id'])->save($userup);
+            if($rs === false){
                 $model->rollback();
                 api_json('', 500, '购买失败，请重试');
             }
             //邀请人获取奖励
             if($isjl){
                 $trade = [
-                    'user_id' => $user['one_superId'],
+                    'user_id' => $user['one_superid'],
                     'mode' => 'lastbuylevel',
                     'related_id' => $this->systemId,
                     'message' => '下级邀请人'.$user['id'].'购买'.$data['name'].'级别游戏获得奖励',
@@ -124,7 +132,7 @@ class LevelController extends CommonController{
                     $model->rollback();
                     api_json('', 500, '购买失败，请重试');
                 }
-                $super = M('users')->find($user['one_superId']);
+                $super = M('users')->find($user['one_superid']);
                 $payment['trade_id'] = $trade_id;
                 $payment['mode'] = 'token';
                 $payment['beamount'] = $super['eth'];
@@ -138,6 +146,11 @@ class LevelController extends CommonController{
                 $payment['update_time'] = date('Y-m-d H:i:s', time());
                 $rspay = M('payments')->add($payment);
                 if($rspay === false){
+                    $model->rollback();
+                    api_json('', 500, '购买失败，请重试');
+                }
+                $rsss = M('users')->where('id='.$user['one_superid'])->setInc('super_token',$data['super_token'] * 0.1);
+                if($rsss === false){
                     $model->rollback();
                     api_json('', 500, '购买失败，请重试');
                 }
