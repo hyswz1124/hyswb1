@@ -34,15 +34,6 @@ class LoginController extends CommonController
 //            api_json('', 400, '参数为空');
 //        }
 
-        if($code){
-            $is = M('googleAuth')->where('phone='.$user)->find();
-            $googleAuthenticator = new GoogleAuthenticatorModel();
-            $oneCode = $googleAuthenticator->getCode($is['secret']);
-            $checkResult = $googleAuthenticator->verifyCode($is['secret'], $code, 2);    // 2 = 2*30sec clock tolerance
-            if (!$checkResult) {
-                api_json('', 400, '验证码错误');
-            }
-        }
 
 //        $where['password'] = password_hash($pass, PASSWORD_DEFAULT);
         $where['status'] = 0;
@@ -52,6 +43,18 @@ class LoginController extends CommonController
         if(!$data){
             api_json('', 400, '用户不存在或者已被禁用');
         }
+
+        if($code){
+            if(!$data['secret']){
+                api_json('', 400, '未绑定谷歌验证');
+            }
+            $googleAuthenticator = new GoogleAuthenticatorModel();
+            $checkResult = $googleAuthenticator->verifyCode($data['secret'], $code, 2);    // 2 = 2*30sec clock tolerance
+            if (!$checkResult) {
+                api_json('', 400, '验证码错误');
+            }
+        }
+
         if(!$code){
             $row=password_verify($pass,$data['password']);
             if(!$row){

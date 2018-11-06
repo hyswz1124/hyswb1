@@ -5,11 +5,6 @@ use Common\Model\GoogleAuthenticatorModel;
 use Think\Controller;
 
 class RechargeController extends CommonController {
-    /**
-     * 此方法程序为用户eth充值、积分充值,用户解锁
-     * @author  wmt<1027918160@qq.com>
-     * @date    2018-10-08
-     */
     protected $userInfo = '';
 
     public function __construct()
@@ -112,8 +107,6 @@ class RechargeController extends CommonController {
 
     /**
      * 户提现
-     * @author  wmt<1027918160@qq.com>
-     * @date    2018-10-10
      */
     public function cash(){
         $user = $this->userInfo;
