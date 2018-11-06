@@ -106,7 +106,7 @@ class RechargeController extends CommonController {
     }
 
     /**
-     * 户提现
+     * 用户提现
      */
     public function cash(){
         $user = $this->userInfo;
@@ -122,10 +122,12 @@ class RechargeController extends CommonController {
         if(!$code){
             api_json(null,'400','验证码不能为空');
         }
-        $secret = M('google_auth')->where('phone='.$user['mphone'])->find();
         $googleAuthenticator = new GoogleAuthenticatorModel();
+        if(!$user['secret']){
+            api_json(null,'400','未绑定谷歌验证');
+        }
 //        $oneCode = $googleAuthenticator->getCode($secret['secret']);
-        $checkResult = $googleAuthenticator->verifyCode($secret['secret'], $code, 2);    // 2 = 2*30sec clock tolerance
+        $checkResult = $googleAuthenticator->verifyCode($user['secret'], $code, 2);    // 2 = 2*30sec clock tolerance
         if (!$checkResult) {
             api_json(null,'400','验证码错误');
         }
