@@ -141,8 +141,11 @@ class RegisterController extends CommonController
         if(!$user){
             echo api_json(null,'400','账号不存在');exit();
         }
+        if(!$user['secret']){
+            echo api_json(null,'400','未绑定谷歌验证');exit();
+        }
         $googleAuthenticator = new GoogleAuthenticatorModel();
-        $checkResult = $googleAuthenticator->verifyCode($$user['secret'], $phone_code, 2);    // 2 = 2*30sec clock tolerance
+        $checkResult = $googleAuthenticator->verifyCode($user['secret'], $phone_code, 2);    // 2 = 2*30sec clock tolerance
         if (!$checkResult) {
             api_json('', 400, '验证码跟秘钥不匹配');
         }
