@@ -68,6 +68,11 @@ class UserController extends CommonController
         if(!$eth_address){
             api_json('', 400, 'ETH 地址不能为空');
         }
+        $iswhere['eth_address'] = $eth_address;
+        $is = M('users')->where($iswhere)->find();
+        if($is){
+            api_json('', 300, '该地址已使用，请更换地址');
+        }
         $data['eth_address'] = $eth_address;
         $data['update_time'] = datetimenew();
         $rs = M('Users')->where('id='.$this->userInfo['id'])->save($data);
