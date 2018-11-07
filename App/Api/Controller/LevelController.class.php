@@ -61,7 +61,7 @@ class LevelController extends CommonController{
             $is_game = M('game')->where($is_game_where)->find();
 
             if($is_game){
-//                api_json('', 400, '存在进行中的游戏，不允许购买');
+                api_json('', 400, '存在进行中的游戏，不允许购买');
             }
 
             $trade = [
