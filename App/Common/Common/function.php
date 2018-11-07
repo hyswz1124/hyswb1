@@ -74,9 +74,6 @@ function code_source($type){
 
 /**
  * 此方法程序为交易结算
- * @author  wmt<1027918160@qq.com>
- * @param type $order
- * @return type
  */
 function trade_settle($trade_id) {
     $settle_trade = M('trades')->where("status = 0 and id = {$trade_id}")->find();
@@ -201,9 +198,6 @@ function trade_settle($trade_id) {
 }
 /**
  * 此方法程序为挂单订单结算
- * @author  wmt<1027918160@qq.com>
- * @param type $order
- * @return type
  */
 
 function order_settle($order,$current_user){
@@ -343,9 +337,6 @@ function order_settle($order,$current_user){
 }
 /**
  * 此方法程序为充值额度空投奖励结算
- * @author  wmt<1027918160@qq.com>
- * @param type airdrop_pool
- * @return type
  */
 function airdrop_reward($user_id){
         $total_eth = M('trades')->where("mode = 'unlock' and status = 1 and user_id=".$user_id)->sum('eth');
