@@ -205,8 +205,10 @@ class LevelController extends CommonController{
         $model->startTrans();
         //更新收益
         $up['all_earnings'] = $all;//总收益
-        $up['govern_earnings'] = round($all*0.2, 2);//可支配收益
-        $up['frozen_earnings'] = $all-$up['govern_earnings'];//不可支配收益
+        $earnings = $all + $level['super_token'] + $user['frozen_earnings'];
+        //获取可支配收益随机数
+        $up['govern_earnings'] = round($earnings * $level['random'] / 100, 2);//可支配收益 （收益+本金+上次不可支配资金）*随机数
+        $up['frozen_earnings'] = $earnings-$up['govern_earnings'];//不可支配收益 （收益+本金+上次不可支配资金）-可支配资金
         $up['update_time'] = datetimenew();
         $up['type'] = 0;
         //没结束游戏时收益累加
