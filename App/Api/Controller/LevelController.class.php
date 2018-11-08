@@ -28,6 +28,7 @@ class LevelController extends CommonController{
     public function buyLevel(){
         $user = $this->checkLogin();
         $level = I('level_id', 0);
+        $is_js = I('is_js', 0);
         $model = M('level');
         $data = $model->find($level);
         if(!$data){
@@ -37,8 +38,61 @@ class LevelController extends CommonController{
             api_json('', 400, '需要先解锁游戏功能');
         }
         $model->startTrans();
+        //是否大于2.5结束
+        if($user['game_status']){
+            if(!$is_js){
+                api_json('', 421, '上一轮游戏已经结束，新一轮游戏需要花费参与游戏的当前等级的10%费用');
+            }else{
+                if($user['super_token'] < $data['super_token'] * 0.1){
+                    api_json('', 400, '积分不足');
+                }
+                $trade = [
+                    'user_id' => $user['id'],
+                    'mode' => 'newlevel',
+                    'related_id' => $this->systemId,
+                    'message' => '用户结束新一轮'.$data['name'].'级别游戏',
+                    'status' => 1,
+                    'eth' => 0,
+                    'token' => $data['super_token'] * 0.1,
+                    'create_time' => date('Y-m-d H:i:s', time()),
+                    'update_time' => date('Y-m-d H:i:s', time()),
+                ];
+                $trade_id = M('trades')->add($trade);
+                if(!$trade_id){
+                    $model->rollback();
+                    api_json('', 500, '购买失败，请重试');
+                }
+                $payment['trade_id'] = $trade_id;
+                $payment['mode'] = 'token';
+                $payment['beamount'] = $user['eth'];
+                $payment['afamount'] = $user['eth'];
+                $payment['betoken'] = $user['super_token'] ;
+                $payment['aftoken'] = $user['super_token'] - ($data['super_token'] * 0.1);
+                $payment['eth'] = 0;
+                $payment['token'] = $data['super_token'] * 0.1;
+                $payment['status'] = 1;
+                $payment['create_time'] = date('Y-m-d H:i:s', time());
+                $payment['update_time'] = date('Y-m-d H:i:s', time());
+                $rspay = M('payments')->add($payment);
+                if($rspay === false){
+                    $model->rollback();
+                    api_json('', 500, '解锁失败，请重试');
+                }
+                $newup['game_number'] = $user['game_number'] + 1;
+                $newup['game_status'] = 0;
+                $newup['super_token'] = $user['super_token'] - $data['super_token'] * 0.1;
+                $newrs = M('users')->where('id='.$user['id'])->save($newup);
+                if($newrs === false){
+                    $model->rollback();
+                    api_json('', 500, '解锁失败，请重试');
+                }
+                $user = M('users')->find($user['id']);
+            }
+        }
         $isjl = false;
-        $is = M('game')->where('uid='.$user['id'])->order('id desc')->find();
+        $where_game['uid'] = $user['id'];
+        $where_game['game_number'] = $user['game_number'];
+        $is = M('game')->where($where_game)->order('id desc')->find();
         if($is){
             if($is['level_id'] > $level){
                 api_json('', 400, '不能购买低级别游戏');
@@ -158,6 +212,7 @@ class LevelController extends CommonController{
 
             $addganme['uid'] = $user['id'];
             $addganme['type'] = 0;
+            $addganme['game_number'] = $user['game_number'];
             $addganme['level_id'] = $level;
             $addganme['start_time'] = datetimenew();
             $addganme['create_time'] = datetimenew();
@@ -191,44 +246,55 @@ class LevelController extends CommonController{
         $times=strtotime(datetimenew())-strtotime($start_time);
         $timei=round($times/60/60);
         $level = M('level')->find($data['level_id']);
-        $all = $level['super_token'] * $level['earnings'] / 100 * $timei / 24;
-        $all = round($all, 2);
+        $all = round($level['super_token'] * $level['earnings'] / 100 , 2);
+        //不足半小时没有收益
+        if(!$timei){
+            $all = 0;
+        }
+//        $all = $level['super_token'] * $level['earnings'] / 100 * $timei / 24;
+//        $all = round($all, 2);
         $is_end = $level['super_token'] * 2.5;
-        //不可支配收益+本局总收益 大于等于2.5倍，强制结束游戏
+        //累计游戏收益 大于等于2.5倍，强制结束游戏
         $is_dy = 0;
-        if($all + $user['frozen_earnings'] >= $is_end){
+        if($all + $user['all_earnings'] >= $is_end){
             $all = $is_end;
             $over = 1;
             $is_dy = 1;
         }
         $model = M('game');
         $model->startTrans();
-        //更新收益
-        $up['all_earnings'] = $all;//总收益
+        //收益
+        $up['all_earnings'] = $all;//收益
         $earnings = $all + $level['super_token'] + $user['frozen_earnings'];
-        //获取可支配收益随机数
-        $up['govern_earnings'] = round($earnings * $level['random'] / 100, 2);//可支配收益 （收益+本金+上次不可支配资金）*随机数
+        $up['govern_earnings'] = 0;//游戏中可支配收益为0
         $up['frozen_earnings'] = $earnings-$up['govern_earnings'];//不可支配收益 （收益+本金+上次不可支配资金）-可支配资金
         $up['update_time'] = datetimenew();
         $up['type'] = 0;
-        //没结束游戏时收益累加
-        $upuser['all_earnings'] = $user['all_earnings'] + $all;
-        $upuser['govern_earnings'] = $user['govern_earnings'] + $up['govern_earnings'];
-        $upuser['frozen_earnings'] = $user['frozen_earnings'] +$up['frozen_earnings'];
+//        没结束游戏时收益累加
+//        $upuser['all_earnings'] = $user['all_earnings'] + $all;
+//        $upuser['govern_earnings'] = $user['govern_earnings'] + $up['govern_earnings'];
+//        $upuser['frozen_earnings'] = $user['frozen_earnings'] +$up['frozen_earnings'];
         if($over){
             //结束游戏，解锁可支配收益
 //            $upuser['all_earnings'] = $user['all_earnings'] + $all;
-            $upuser['govern_earnings'] = 0;
+            $up['govern_earnings'] = round($earnings * $level['random'] / 100, 2);//可支配收益 （收益+本金+上次不可支配资金）*随机数
+            $up['frozen_earnings'] = $earnings-$up['govern_earnings'];//不可支配收益 （收益+本金+上次不可支配资金）-可支配资金
+            $upuser['govern_earnings'] = $up['govern_earnings'];
+            $upuser['frozen_earnings'] = $up['frozen_earnings'];
 //            $upuser['is_js'] = 0;//关闭游戏功能，需再次解锁
             $upuser['super_token'] = $user['super_token'] + $up['govern_earnings'];
+            $upuser['all_earnings'] = $user['all_earnings'] + $all;
             $supertoken = $up['govern_earnings'];//本次收益,结束游戏本次收益为可支配收益
             $up['type'] = 1;
-            $up['govern_earnings'] = 0;
             //收益大于等于2.5倍，解锁所有收益
             if($is_dy){
                 $supertoken = $all;//本次收益为2.5倍
                 $up['frozen_earnings'] = 0;
+                $up['govern_earnings'] = 0;
+                $upuser['all_earnings'] = 0;
+                $upuser['govern_earnings'] = 0;
                 $upuser['frozen_earnings'] = 0;
+                $upuser['game_status'] = 1;
                 $upuser['super_token'] = $user['super_token'] + $supertoken;
             }
 
@@ -265,17 +331,20 @@ class LevelController extends CommonController{
                 $model->rollback();
                 api_json('', 500, '获取失败，请重试');
             }
+
+            $rss = M('users')->where('id='.$user['id'])->save($upuser);
+            if($rss === false){
+                $model->rollback();
+                api_json('', 500, '获取失败，请重试');
+            }
+
+            $rs = $model->where($where)->save($up);
+            if($rs === false){
+                $model->rollback();
+                api_json('', 500, '获取失败，请重试');
+            }
         }
-        $rss = M('users')->where('id='.$user['id'])->save($upuser);
-        if($rss === false){
-            $model->rollback();
-            api_json('', 500, '获取失败，请重试');
-        }
-        $rs = $model->where($where)->save($up);
-        if($rs === false){
-            $model->rollback();
-            api_json('', 500, '获取失败，请重试');
-        }
+
         $model->commit();
         api_json($up, 200, '成功');
     }
