@@ -248,11 +248,11 @@ class LevelController extends CommonController{
         $level = M('level')->find($data['level_id']);
         $all = round($level['super_token'] * $level['earnings'] / 100 , 2);
         //不足半小时没有收益
-        if(!$timei){
-            $all = 0;
-        }
-//        $all = $level['super_token'] * $level['earnings'] / 100 * $timei / 24;
-//        $all = round($all, 2);
+//        if(!$timei){
+//            $all = 0;
+//        }
+        $all = $level['super_token'] * $level['earnings'] / 100 * $timei / 24;
+        $all = round($all, 2);
         $is_end = $level['super_token'] * 2.5;
         //累计游戏收益 大于等于2.5倍，强制结束游戏
         $is_dy = 0;
