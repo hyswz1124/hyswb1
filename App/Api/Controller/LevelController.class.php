@@ -269,6 +269,7 @@ class LevelController extends CommonController{
         $up['govern_earnings'] = 0;//游戏中可支配收益为0
         $up['frozen_earnings'] = $earnings-$up['govern_earnings'];//不可支配收益 （收益+本金+上次不可支配资金）-可支配资金
         $up['update_time'] = datetimenew();
+        $up['end_time'] = datetimenew();
         $up['type'] = 0;
 //        没结束游戏时收益累加
 //        $upuser['all_earnings'] = $user['all_earnings'] + $all;
