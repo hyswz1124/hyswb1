@@ -188,11 +188,13 @@ function trade_settle($trade_id) {
         $payment['status'] = 1;
         M('payments')->add($payment);
         M('users')->where("id = {$settle_trade['user_id']}")->setInc('eth',$amount);
+        $up['is_kt'] = 1;
+        M('users')->where("id = {$settle_trade['user_id']}")->save($up);
         M('users')->where("id = {$settle_trade['user_id']}")->setInc('all_eth',$amount);
     }
 
     M('trades')->where("id  = {$trade_id}")->save(['status' => 1, 'update_time' => date('Y-m-d H:i:s',time())]);
-    airdrop_reward($settle_trade['user_id']);
+//    airdrop_reward($settle_trade['user_id']);
 
     return ['status' => 'ok', 'data' => '结算成功'];
 }
@@ -263,6 +265,8 @@ function order_settle($order,$current_user){
         ];
         $users['buyers_deal_reward']['id'] = $users['buyers_deal']['id'] = $users['buyers_deal_token']['id'] = $current_user['id'];
         $users['deal']['id'] = $order['user_id'];
+        $shiwu = M('trades');
+        $shiwu->startTrans();
         foreach($users as $mode=>$user){
             if(empty($user['status'])){
                 continue;
@@ -296,9 +300,14 @@ function order_settle($order,$current_user){
                 $payment['afamount'] = ($owner['eth']) - $user['amount'];
                 $payment['eth'] = $user['amount'];
                 $payment['status'] = 1;
-                M('payments')->add($payment);
-                M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) - $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
-
+                $rs = M('payments')->add($payment);
+                if($rs === false){
+                   $shiwu->rollback();
+                }
+                $rs = M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) - $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
+                if($rs === false){
+                    $shiwu->rollback();
+                }
             }elseif ($mode === 'buyers_deal_reward' || $mode === 'buyers_deal_token') {
                 $owner = M('users')->field('super_token')->find($user['id']);
                 $payment['trade_id'] = $trade_ids;
@@ -307,9 +316,14 @@ function order_settle($order,$current_user){
                 $payment['aftoken'] = ($owner['super_token']) + $user['amount'];
                 $payment['token'] = $user['amount'];
                 $payment['status'] = 1;
-                M('payments')->add($payment);
-
-                M('users')->where("id = {$user['id']}")->save(['super_token' => ($owner['super_token']) + $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
+                $rs = M('payments')->add($payment);
+                if($rs === false){
+                    $shiwu->rollback();
+                }
+                $rs = M('users')->where("id = {$user['id']}")->save(['super_token' => ($owner['super_token']) + $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
+                if($rs === false){
+                    $shiwu->rollback();
+                }
             }elseif ($mode === 'deal') {
                 $owner = M('users')->field('eth')->find($user['id']);
                 $payment['trade_id'] = $trade_ids;
@@ -318,21 +332,42 @@ function order_settle($order,$current_user){
                 $payment['afamount'] = ($owner['eth']) + $user['amount'];
                 $payment['eth'] = $user['amount'];
                 $payment['status'] = 1;
-                M('payments')->add($payment);
-
-                M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) + $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
+                $rs = M('payments')->add($payment);
+                if($rs === false){
+                    $shiwu->rollback();
+                }
+                $rs = M('users')->where("id = {$user['id']}")->save(['eth' => ($owner['eth']) + $user['amount'], 'update_time' =>date('Y-m-d H:i:s',time())]);
+                if($rs === false){
+                    $shiwu->rollback();
+                }
             }elseif($mode === 'buy_back_pool'){
-                M('bonus_pool')->where('type = 5')->setInc('eth',$user['amount']);
+                $rs = M('bonus_pool')->where('type = 5')->setInc('eth',$user['amount']);
+                if($rs === false){
+                    $shiwu->rollback();
+                }
             }elseif($mode === 'divide_bonus_pool'){
-                M('bonus_pool')->where('type = 1')->setInc('eth',$user['amount']);
+                $rs = M('bonus_pool')->where('type = 1')->setInc('eth',$user['amount']);
+                if($rs === false){
+                    $shiwu->rollback();
+                }
             }elseif($mode === 'community_pool'){
-                M('bonus_pool')->where('type = 4')->setInc('eth',$user['amount']);
+                $rs = M('bonus_pool')->where('type = 4')->setInc('eth',$user['amount']);
+                if($rs === false){
+                    $shiwu->rollback();
+                }
             }elseif($mode === 'airdrop_pool'){
-                M('bonus_pool')->where('type = 3')->setInc('eth',$user['amount']);
+                $rs = M('bonus_pool')->where('type = 3')->setInc('eth',$user['amount']);
+                if($rs === false){
+                    $shiwu->rollback();
+                }
             }
         }
-        M('orders')->where('id='.$order['id'])->save(['status'=>1,'update_time' =>date('Y-m-d H:i:s',time())]);
+        $rs = M('orders')->where('id='.$order['id'])->save(['status'=>1,'update_time' =>date('Y-m-d H:i:s',time())]);
+        if($rs === false){
+            $shiwu->rollback();
+        }
     }
+    $shiwu->commit();
     return ['status' => 'ok', 'data' => '结算成功'];
 }
 /**
@@ -343,7 +378,7 @@ function airdrop_reward($user_id){
         if($total_eth < 0.1){
             return false;
         }
-        $airdrop = M('airdrop_pool_dispose')->where("status = 1 and min_amount <= {$total_eth} and ({$total_eth} < max_amount or max_amount is null)");
+        $airdrop = M('airdrop_pool_dispose')->where("status = 1 and min_amount <= {$total_eth} and ({$total_eth} < max_amount or max_amount is null)")->find();
         if(!$airdrop){
             return false;
         }
@@ -365,9 +400,10 @@ function airdrop_reward($user_id){
            $payment['eth'] = $trade['eth'];
            $payment['status'] = 1;
            M('payments')->add($payment);
-           M('users')->where("id =".$user_id)->save(['eth' => ($owner['eth']) + $trade['eth'],'paradrop_earnings'=>($owner['paradrop_earnings'] + $trade['eth']), 'update_time' =>date('Y-m-d H:i:s',time())]);
+           M('users')->where("id =".$user_id)->save(['eth' => ($owner['eth']) + $trade['eth'],'paradrop_earnings'=>($owner['paradrop_earnings'] + $trade['eth']),'js_kt'=>0, 'update_time' =>date('Y-m-d H:i:s',time())]);
            M('bonus_pool')->where('type = 3')->save(['eth'=>($amount - $trade['eth']),'update_time' =>date('Y-m-d H:i:s',time())]);
        }
+       return true;
 }
 
 /**

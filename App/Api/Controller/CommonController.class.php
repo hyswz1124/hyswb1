@@ -46,7 +46,7 @@ class CommonController extends Controller
             api_json(null, 108, '缺少 token');
         }
         $where['token'] = $token;
-        $field = 'id, nickname,one_superid,two_superid, game_status, game_number, code, mphone, secret, email, is_js, is_freeze,  token, super_token, eth, eth_address, all_earnings,all_token, all_eth, dynamic_earnings, dividend_earnings, node_earnings, paradrop_earnings, invite_earnings, govern_earnings, frozen_earnings';
+        $field = 'id, nickname,js_kt,one_superid,two_superid, game_status, game_number, code, mphone, secret, email, is_js, is_freeze,  token, super_token, eth, eth_address, all_earnings,all_token, all_eth, dynamic_earnings, dividend_earnings, node_earnings, paradrop_earnings, invite_earnings, govern_earnings, frozen_earnings';
         $data = M('users')->where($where)->field($field)->find();
         if (!$data) {
             api_json(null, 109, 'token错误');

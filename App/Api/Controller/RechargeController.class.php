@@ -265,6 +265,18 @@ class RechargeController extends CommonController {
     }
 
 
+    public function ktjl(){
+        $user = $this->userInfo;
+        if(!$user['is_kt']){
+            api_json('', 400, '充值ETH 大于0.1才可以享受空投奖励');
+        }
+        $rs = airdrop_reward($user['id']);
+        if(!$rs){
+            api_json('', 400, '未知的错误');
+        }
+        api_json('', 200, '已获得空投奖励');
+    }
+
     /**
      * 充值交易详情
      */

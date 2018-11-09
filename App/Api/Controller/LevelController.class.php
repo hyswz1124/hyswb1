@@ -245,6 +245,11 @@ class LevelController extends CommonController{
         $start_time = $data['start_time'];
         $times=strtotime(datetimenew())-strtotime($start_time);
         $timei=round($times/60/60);
+        if($over){
+            if($timei < 24){
+                api_json('', 300, '游戏时长不足24小时，不允许结束');
+            }
+        }
         $level = M('level')->find($data['level_id']);
         $all = round($level['super_token'] * $level['earnings'] / 100 , 2);
         //不足半小时没有收益
