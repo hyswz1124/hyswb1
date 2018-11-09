@@ -88,7 +88,30 @@ class CommonController extends Controller
         $address = M('wallet')->find(1);
         $data['official_eth'] = $address['address'];
         $data['official_pic'] = $address['pic'];
-        $data['invite_address'] = C('INVITEHOST').$data['id'];;
+        $data['invite_address'] = C('INVITEHOST').$data['id'];
+
+
+        $pool = M('bonus_pool')->where('status=0')->select();
+        foreach ($pool as $v){
+            if($v['type'] == 1){
+                $data['fh_pool'] = (double)$v['eth'];
+                $data['jd_pool'] = round($data['fh_pool']  * 0.9, 2);
+                $data['kf_pool'] = $data['fh_pool'] - $data['jd_pool'];
+            }
+            if($v['type'] == 2){
+                $data['fz_pool'] = (double)$v['eth'];
+            }
+            if($v['type'] == 3){
+                $data['kt_pool'] = (double)$v['eth'];
+            }
+            if($v['type'] == 4){
+                $data['sq_pool'] = (double)$v['eth'];
+            }
+            if($v['type'] == 5){
+                $data['hg_pool'] = (double)$v['eth'];
+            }
+        }
+
         return $data;
     }
 
