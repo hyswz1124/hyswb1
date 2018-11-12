@@ -7,7 +7,7 @@ class RechargeController extends CommonController {
     /**
      * 此方法程序为管理员给用户eth充值、积分充值,用户解锁
      */
-    protected $userInfo = '';
+    protected $adminInfo = '';
 
     public function __construct()
     {
