@@ -404,7 +404,7 @@ function airdrop_reward($user_id){
            $payment['eth'] = $trade['eth'];
            $payment['status'] = 1;
            M('payments')->add($payment);
-           M('users')->where("id =".$user_id)->save(['eth' => ($owner['eth']) + $trade['eth'],'paradrop_earnings'=>($owner['paradrop_earnings'] + $trade['eth']),'js_kt'=>0, 'update_time' =>date('Y-m-d H:i:s',time())]);
+           M('users')->where("id =".$user_id)->save(['eth' => ($owner['eth']) + $trade['eth'],'paradrop_earnings'=>($owner['paradrop_earnings'] + $trade['eth']),'is_kt'=>0, 'update_time' =>date('Y-m-d H:i:s',time())]);
            M('bonus_pool')->where('type = 3')->save(['eth'=>($amount - $trade['eth']),'update_time' =>date('Y-m-d H:i:s',time())]);
        }
        return true;
