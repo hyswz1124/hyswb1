@@ -82,14 +82,14 @@ return array(
     'TRACE_MAX_RECORD'       => 100, // 每个级别的错误信息 最大记录数
 
     /* 日志设置 */
-    'LOG_RECORD'             => false, // 默认不记录日志
+    'LOG_RECORD'             => true, // 默认不记录日志
     'LOG_TYPE'               => 'File', // 日志记录类型 默认为文件方式
     'LOG_LEVEL'              => 'EMERG,ALERT,CRIT,ERR', // 允许记录的日志级别
     'LOG_FILE_SIZE'          => 2097152, // 日志文件大小限制
     'LOG_EXCEPTION_RECORD'   => false, // 是否记录异常信息日志
 
     /* SESSION设置 */
-    'SESSION_AUTO_START'     => false, // 是否自动开启Session
+    'SESSION_AUTO_START'     => true, // 是否自动开启Session
     'SESSION_OPTIONS'        => array(), // session 配置数组 支持type name id path expire domain 等参数
     'SESSION_TYPE'           => '', // session hander类型 默认无需设置 除非扩展了session hander驱动
     'SESSION_PREFIX'         => '', // session 前缀
