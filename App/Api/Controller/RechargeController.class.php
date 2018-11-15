@@ -356,11 +356,10 @@ class RechargeController extends CommonController {
             ->field($filed)
             ->where($where);
         if($checked){
-            $data = $sql->where("a.mode = 'income_user_recommender_one' or a.mode = 'income_user_recommender_two'")->limit($limit*($page-1), $limit)->order("a.id desc")->select();
-        }else{
-            $data = $sql->limit($limit*($page-1), $limit)->order("a.id desc")->select();
+            $sql = $sql->where("a.mode = 'income_user_recommender_one' or a.mode = 'income_user_recommender_two'");
         }
-        $count =  M('trades a')->join('yt_payments b on b.trade_id = a.id')->where($where.$sql)->count();
+        $data = $sql->limit($limit*($page-1), $limit)->order("a.id desc")->select();
+        $count =  $sql->count();
         api_json(array('data'=>$data,'count'=>$count?$count:0),200,'获取成功');
     }
 
