@@ -344,7 +344,7 @@ class RechargeController extends CommonController {
                 $where['a.mode'] = 'income_node_reward';
                 break;
             case 3:
-                $where['a.mode|a.messeage'] = 'income_user_recommender_one';
+                $where['a.mode'] = 'income_user_recommender_one|income_user_recommender_two';
                 break;
             default:
                 api_json(null,300,'type参数错误');
