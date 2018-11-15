@@ -355,7 +355,6 @@ class RechargeController extends CommonController {
             ->field($filed)
             ->where($where)
             ->limit($limit*($page-1), $limit)->order("a.id desc")->select();
-        api_json(m('trades a')->_sql(),200,'获取成功');
         $count =  M('trades a')->join('yt_payments b on b.trade_id = a.id')->where($where)->count();
         api_json(array('data'=>$data,'count'=>$count),200,'获取成功');
     }
