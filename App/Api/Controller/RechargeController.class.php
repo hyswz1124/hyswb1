@@ -323,4 +323,37 @@ class RechargeController extends CommonController {
         }
         api_json(1, 200, '撤销成功');
     }
+    /**
+     * 用户领取列表 （分红，节点奖励，空投奖励，推荐人获利）
+     */
+    public function draw_list(){
+        $user = $this->userInfo;
+        $type = I('type',0,'int');
+        $page = I('page', 1, 'int');
+        $limit = I('pageSize', 20, 'int');
+        $where['user_id'] = $user['id'];
+        switch($type){
+            case 0:
+                $where['a.mode'] = 'income_deal';
+                break;
+            case 1:
+                $where['a.mode'] = 'income_airdrop_reward';
+                break;
+            case 2:
+                $where['a.mode'] = 'income_node_reward';
+                break;
+            case 3:
+                $where['a.mode'] = 'income_user_recommender_one | user_recommender_two';
+                break;
+            default:
+                api_json(null,300,'type参数错误');
+                break;
+        }
+        $data = m('trades a')->join('yt_payments b on b.trade_id = a.id')
+            ->where($where)
+            ->limit($limit*($page-1), $limit)->order("a.id desc")->select();
+        $count =  M('trades a')->join('yt_payments b on b.trade_id = a.id')->where($where)->count();
+        api_json(array('data'=>$data,'count'=>$count),200,'获取成功');
+    }
+
 }
