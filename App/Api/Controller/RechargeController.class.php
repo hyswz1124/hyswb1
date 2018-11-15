@@ -345,7 +345,7 @@ class RechargeController extends CommonController {
                 break;
             case 3:
 //                $where['a.mode'] = 'income_user_recommender_one|income_user_recommender_two';
-                $where.=" and (a.mode = 'income_user_recommender_one' or a.mode ='income_user_recommender_two')";
+                $sql=" and (a.mode = 'income_user_recommender_one' or a.mode ='income_user_recommender_two')";
                 break;
             default:
                 api_json(null,300,'type参数错误');
@@ -353,9 +353,9 @@ class RechargeController extends CommonController {
         }
         $data = m('trades a')->join('yt_payments b on b.trade_id = a.id')
             ->field($filed)
-            ->where($where)
+            ->where($where.$sql)
             ->limit($limit*($page-1), $limit)->order("a.id desc")->select();
-        $count =  M('trades a')->join('yt_payments b on b.trade_id = a.id')->where($where)->count();
+        $count =  M('trades a')->join('yt_payments b on b.trade_id = a.id')->where($where.$sql)->count();
         api_json(array('data'=>$data,'count'=>$count),200,'获取成功');
     }
 
