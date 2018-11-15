@@ -332,6 +332,7 @@ class RechargeController extends CommonController {
         $page = I('page', 1, 'int');
         $limit = I('pageSize', 20, 'int');
         $where['user_id'] = $user['id'];
+        $filed = 'a.id,a.mode,a.message,a.eth,a.token,a.create_time,b.beamount,b.afamount,b.betoken,b.aftoken';
         switch($type){
             case 0:
                 $where['a.mode'] = 'income_deal';
@@ -350,6 +351,7 @@ class RechargeController extends CommonController {
                 break;
         }
         $data = m('trades a')->join('yt_payments b on b.trade_id = a.id')
+            ->field($filed)
             ->where($where)
             ->limit($limit*($page-1), $limit)->order("a.id desc")->select();
         $count =  M('trades a')->join('yt_payments b on b.trade_id = a.id')->where($where)->count();
