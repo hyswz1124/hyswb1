@@ -333,6 +333,7 @@ class RechargeController extends CommonController {
         $limit = I('pageSize', 20, 'int');
         $where['user_id'] = $user['id'];
         $filed = 'a.id,a.mode,a.message,a.eth,a.token,a.create_time,b.beamount,b.afamount,b.betoken,b.aftoken';
+        $checked = false;
         switch($type){
             case 0:
                 $where['a.mode'] = 'income_deal';
@@ -344,19 +345,23 @@ class RechargeController extends CommonController {
                 $where['a.mode'] = 'income_node_reward';
                 break;
             case 3:
-//                $where['a.mode'] = 'income_user_recommender_one|income_user_recommender_two';
-                $sql=" and (a.mode = 'income_user_recommender_one' or a.mode ='income_user_recommender_two')";
+                $checked = true;
+//                $where['a.mode'] = 'income_user_recommender_one or income_user_recommender_two';
                 break;
             default:
                 api_json(null,300,'type参数错误');
                 break;
         }
-        $data = m('trades a')->join('yt_payments b on b.trade_id = a.id')
+        $sql = m('trades a')->join('yt_payments b on b.trade_id = a.id')
             ->field($filed)
-            ->where($where.$sql)
-            ->limit($limit*($page-1), $limit)->order("a.id desc")->select();
+            ->where($where);
+        if($checked){
+            $data = $sql->where("a.mode = 'income_user_recommender_one' or a.mode = 'income_user_recommender_two'")->limit($limit*($page-1), $limit)->order("a.id desc")->select();
+        }else{
+            $data = $sql->limit($limit*($page-1), $limit)->order("a.id desc")->select();
+        }
         $count =  M('trades a')->join('yt_payments b on b.trade_id = a.id')->where($where.$sql)->count();
-        api_json(array('data'=>$data,'count'=>$count),200,'获取成功');
+        api_json(array('data'=>$data,'count'=>$count?$count:0),200,'获取成功');
     }
 
 }
