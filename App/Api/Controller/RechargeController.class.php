@@ -393,7 +393,7 @@ class RechargeController extends CommonController {
                     $result[$k]['type'] = 3;
                     break;
                 case 'income_user_recommender_two':
-                    $result[$k]['type'] = 4;
+                    $result[$k]['type'] = 3;
                     break;
             }
             if($mode == 'income_airdrop_reward' || $mode == 'income_node_reward' || $mode == 'income_deal' || $mode == 'unlock'
