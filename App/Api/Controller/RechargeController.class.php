@@ -331,7 +331,8 @@ class RechargeController extends CommonController {
         $type = I('type',0,'int');
         $page = I('page', 1, 'int');
         $limit = I('pageSize', 20, 'int');
-        $where['user_id'] = $user['id'];
+        $where['a.user_id'] = $user['id'];
+        $where['a.status'] = 1;
         $filed = 'a.id,a.mode,a.message,a.eth,a.token,a.create_time,b.beamount,b.afamount,b.betoken,b.aftoken';
         $checked = false;
         switch($type){
