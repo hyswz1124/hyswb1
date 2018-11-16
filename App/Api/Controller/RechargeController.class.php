@@ -336,7 +336,7 @@ class RechargeController extends CommonController {
         $checked = false;
         switch($type){
             case 0:
-                $where['a.mode'] = 'income_deal';
+//                $where['a.mode'] = 'income_deal';
                 break;
             case 1:
                 $where['a.mode'] = 'income_airdrop_reward';
@@ -347,6 +347,15 @@ class RechargeController extends CommonController {
             case 3:
                 $checked = true;
 //                $where['a.mode'] = 'income_user_recommender_one or income_user_recommender_two';
+                break;
+            case 4:
+                $where['a.mode'] = 'income_deal';
+                break;
+            case 5:
+                $where['a.mode'] = 'unlock';
+                break;
+            case 6:
+                $where['a.mode'] = 'cash';
                 break;
             default:
                 api_json(null,300,'type参数错误');
