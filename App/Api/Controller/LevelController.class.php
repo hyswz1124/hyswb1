@@ -163,6 +163,8 @@ class LevelController extends CommonController{
                 $userup['super_token'] = $user['super_token'] - ($data['super_token'] * 1.1);
                 $userup['all_token'] = $user['all_token'] + ($data['super_token'] * 1.1);
             }
+            //清空可支配收益
+            $userup['govern_earnings'] = 0;
             $rs =  M('users')->where('id='.$user['id'])->save($userup);
             if($rs === false){
                 $model->rollback();
