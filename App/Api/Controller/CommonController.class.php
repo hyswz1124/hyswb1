@@ -83,8 +83,10 @@ class CommonController extends Controller
         $gameid = M('game')->where($gameWhere)->find();
         if(!$gameid['id']){
             $gameid['id'] = 0;
+            $gameid['level_id'] = 0;
         }
         $data['gameid'] = $gameid['id'];
+        $data['game_level'] = $gameid['level_id'];
         $address = M('wallet')->find(1);
         $data['official_eth'] = $address['address'];
         $data['official_pic'] = $address['pic'];
