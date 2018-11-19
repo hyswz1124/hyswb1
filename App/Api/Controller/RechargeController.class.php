@@ -251,12 +251,28 @@ class RechargeController extends CommonController {
                 }
                 $trade['photo'] = $img['data'];
             }
+ //充值改为直接通过
             $trade_id = M('trades')->add($trade);
-            if ($trade_id) {
-                api_json(1,'200','充值提交成功');
-            }else{
-                api_json(null,'500','网络故障');
-            }
+          if($trade_id){
+              $tradeId = $trade_id;
+              $settle = trade_settle($tradeId);
+              if ($settle['status'] === 'ok') {
+//                  $logTitle = '管理员:' . $this->adminid . '同意充值(id:'.$tradeId.')';
+//                  D('AdminLog')->save_log($this->adminid, '充值审核', $logTitle, 'trades', $tradeId);
+                  api_json(1,'200','操作成功');
+              }else{
+                  api_json(null,'500','操作失败');
+              }
+          }else{
+              api_json(null,'500','交易入库失败，请重试');
+          }
+
+            $trade_id = M('trades')->add($trade);
+//            if ($trade_id) {
+//                api_json(1,'200','充值提交成功');
+//            }else{
+//                api_json(null,'500','网络故障');
+//            }
 
 //        } catch (\Exception $e) {
 //            M('trades')->rollback();
