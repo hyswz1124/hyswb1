@@ -29,6 +29,7 @@ class LevelController extends CommonController{
         $user = $this->checkLogin();
         $level = I('level_id', 0);
         $is_js = I('is_js', 0);
+        $upgrade = I('upgrade', 0);
         $model = M('level');
         $data = $model->find($level);
         if(!$data){
@@ -90,23 +91,26 @@ class LevelController extends CommonController{
             }
         }
         $isjl = false;
-        $where_game['uid'] = $user['id'];
-        $where_game['game_number'] = $user['game_number'];
-        $is = M('game')->where($where_game)->order('id desc')->find();
-        if($is){
-            if($is['level_id'] > $level){
-                api_json('', 400, '不能购买低级别游戏');
-            }
-            if($is['level_id'] < $level){
-                if($user['one_superid']){
-                    if($user['super_token'] < $data['super_token'] * 1.1){
-                        api_json('', 400, '积分不足,请先兑换');
-                    }
-                    $isjl = true;
+        if($upgrade){
+            $where_game['uid'] = $user['id'];
+            $where_game['game_number'] = $user['game_number'];
+            $is = M('game')->where($where_game)->order('id desc')->find();
+            if($is){
+                if($is['level_id'] > $level){
+                    api_json('', 400, '不能购买低级别游戏');
                 }
+                if($is['level_id'] < $level){
+                    if($user['one_superid']){
+                        if($user['super_token'] < $data['super_token'] * 1.1){
+                            api_json('', 400, '积分不足,请先兑换');
+                        }
+                        $isjl = true;
+                    }
 
+                }
             }
         }
+
         if($user['super_token'] < $data['super_token']){
             api_json('', 400, '积分不足,请先兑换');
         }else{
