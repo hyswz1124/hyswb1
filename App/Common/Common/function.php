@@ -378,7 +378,7 @@ function order_settle($order,$current_user){
  * 此方法程序为充值额度空投奖励结算
  */
 function airdrop_reward($user_id){
-        $total_eth = M('trades')->where("mode = 'unlock' and status = 1 and user_id=".$user_id)->sum('eth');
+        $total_eth = M('trades')->where("mode = 'recharge' and status = 1 and user_id=".$user_id)->sum('eth');
         if($total_eth < 0.1){
             return false;
         }
