@@ -395,7 +395,6 @@ function airdrop_reward($user_id){
         $trade['message'] = '充值空投奖励收入';
         $trade['eth'] = round($amount * $airdrop['proportion']/100,4);
         $trade['status'] = 1;
-        return json_encode($trade);
         $trade_ids = M('trades')->add($trade);
        if($total_eth){
            $payment['trade_id'] = $trade_ids;
@@ -405,6 +404,7 @@ function airdrop_reward($user_id){
            $payment['eth'] = $trade['eth'];
            $payment['status'] = 1;
            M('payments')->add($payment);
+           return 12;
            M('users')->where("id =".$user_id)->save(['eth' => ($owner['eth']) + $trade['eth'],'paradrop_earnings'=>($owner['paradrop_earnings'] + $trade['eth']),'is_kt'=>0, 'update_time' =>date('Y-m-d H:i:s',time())]);
            M('bonus_pool')->where('type = 3')->save(['eth'=>($amount - $trade['eth']),'update_time' =>date('Y-m-d H:i:s',time())]);
        }
