@@ -189,7 +189,7 @@ function trade_settle($trade_id) {
         M('payments')->add($payment);
         M('users')->where("id = {$settle_trade['user_id']}")->setInc('eth',$amount);
 
-        $total_eth = M('trades')->where("mode = 'unlock' and user_id=".$settle_trade['user_id'])->sum('eth');
+        $total_eth = M('trades')->where("mode = 'recharge' and user_id=".$settle_trade['user_id'])->sum('eth');
         if($total_eth >= 0.1){
             $up['is_kt'] = 1;
             M('users')->where("id = {$settle_trade['user_id']}")->save($up);
