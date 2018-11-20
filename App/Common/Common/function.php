@@ -383,7 +383,6 @@ function airdrop_reward($user_id){
             return false;
         }
         $airdrop = M('airdrop_pool_dispose')->where("status = 1 and min_amount <= {$total_eth} and ({$total_eth} < max_amount or max_amount is null)")->find();
-        return $airdrop;
         if(!$airdrop){
             return false;
         }
@@ -396,6 +395,7 @@ function airdrop_reward($user_id){
         $trade['message'] = '充值空投奖励收入';
         $trade['eth'] = round($amount * $airdrop['proportion']/100,4);
         $trade['status'] = 1;
+        return json_encode($trade);
         $trade_ids = M('trades')->add($trade);
        if($total_eth){
            $payment['trade_id'] = $trade_ids;
