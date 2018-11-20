@@ -383,6 +383,7 @@ function airdrop_reward($user_id){
             return false;
         }
         $airdrop = M('airdrop_pool_dispose')->where("status = 1 and min_amount <= {$total_eth} and ({$total_eth} < max_amount or max_amount is null)")->find();
+        return $airdrop;
         if(!$airdrop){
             return false;
         }
