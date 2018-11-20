@@ -290,7 +290,7 @@ class RechargeController extends CommonController {
         if(!$rs){
             api_json('', 400, '未知的错误');
         }
-        api_json('', 200, $rs);
+        api_json('', 200, '已获得空投奖励');
     }
 
     /**
