@@ -415,11 +415,11 @@ class RechargeController extends CommonController {
             }
             if($mode == 'income_airdrop_reward' || $mode == 'income_node_reward' || $mode == 'income_deal' || $mode == 'unlock'
                 || $mode == 'cash' || $mode == 'recharge' || $mode == 'buyers_deal' || $mode == 'income_unlock' || $mode == 'income_user_recommender_one' || $mode == 'income_user_recommender_two'){
-                $result[$k]['amount'] = $v['eth'].'eth';
+                $result[$k]['amount'] = $v['eth'].'key';
                 if($v['afamount'] >= $v['beamount']){
-                    $result[$k]['s_amount'] = '+'.$v['eth'].'eth';
+                    $result[$k]['s_amount'] = '+'.$v['eth'].'key';
                 }else{
-                    $result[$k]['s_amount'] = '-'.$v['eth'].'eth';
+                    $result[$k]['s_amount'] = '-'.$v['eth'].'key';
                 }
             }elseif($mode == 'buylevel' || $mode == 'cancel_list_deal' || $mode == 'lastbuylevel' || $mode == 'gameover'
                 || $mode == 'income_buyers_deal_reward' || $mode == 'income_buyers_deal_token' || $mode == 'buyers_deal'){
