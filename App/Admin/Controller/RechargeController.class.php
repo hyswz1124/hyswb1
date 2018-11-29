@@ -25,7 +25,7 @@ class RechargeController extends CommonController {
 //        try {
             $settle = trade_settle($tradeId);
             if ($settle['status'] === 'ok') {
-                M('trades')->commit();
+//                M('trades')->commit();
                 $logTitle = '管理员:' . $this->adminid . '同意充值(id:'.$tradeId.')';
                 D('AdminLog')->save_log($this->adminid, '充值审核', $logTitle, 'trades', $tradeId);
                 api_json(1,'200','操作成功');
@@ -53,7 +53,7 @@ class RechargeController extends CommonController {
         if(!$trade){
             api_json(null,'100','该充值记录不存在');
         }
-        $result = M('trades')->where("id = {$tradeId}")->save(['status'=>2,'update_time' =>date('Y-m-d H:i:s',time())]);
+        $result = M('trades')->where("id = {$tradeId}")->save(['status'=>3,'reason'=>$reason,'update_time' =>date('Y-m-d H:i:s',time())]);
         if($result){
             api_json(1,'200','操作成功');
         }
@@ -118,7 +118,7 @@ class RechargeController extends CommonController {
         $res = M('payments')->add($add_payment);              //插入退款支付记录
 
         $result = M('users')->where("id = {$trade['user_id']}")->save(['eth' => $user['eth'] + $trade['amount']]);       //修改用户余额
-        $results = M('trades')->where("id = {$trade['id']}")->save(['status' => 2,'update_time' =>date('Y-m-d H:i:s',time())]);                //修改交易状态
+        $results = M('trades')->where("id = {$trade['id']}")->save(['status' => 3,'reason'=>$reason,'update_time' =>date('Y-m-d H:i:s',time())]);                //修改交易状态
         if(!$res || !$trade_id || !$result || !$results){
             $tradeDB->rollback();
             api_json(null, 500, '网络故障，退款失败');
@@ -142,30 +142,97 @@ class RechargeController extends CommonController {
         return $user;
     }
     /**
-     * 获取充值列表
+     * 获取充值列表  提现列表
      */
     public function checkList(){
+        $state = I('state',0,'int');
+        $page = I('page', 1, 'int');
+        $limit = I('pageSize', 20, 'int');
         $type = I('type',0,'int');
-        switch($type){
+        $name = trim(I('name', '', 'addslashes'));
+        if(!in_array($type,[0,1])){
+            api_json(null,300,'type参数错误');
+        }
+        if($type == 1){
+            $where['b.mode'] = 'recharge';
+        }else{
+            $where['b.mode'] = 'cash';
+        }
+        if ($name) {
+            $where['a.mphone|a.email|a.eth_address'] = array('like', '%' . $name . '%');
+        }
+        $start_time = I('start_time', '', '');
+        $end_time = I('end_time', '', '');
+        if($start_time and !$end_time){
+            $where['b.create_time'] = array('GT', $start_time);
+        }
+        if($end_time and !$start_time){
+            $where['b.create_time'] = array('LT', $end_time);
+        }
+        if($start_time and $end_time){
+            $where['b.create_time'] = array(array('GT', $start_time), array('LT', $end_time));
+        }
+        switch($state){
             case 0:
-                $where = "a.mode = 'recharge' and status >= 0";
+                $where['b.status'] = array('GT', 0);
                 break;
             case 1:
-                $where = "mode = 'recharge' and status = 0";
+                $where['b.status'] = 0;
                 break;
             case 2:
-                $where = "mode = 'recharge' and status = 1";
+                $where['b.status'] = 1;
                 break;
             case 3:
-                $where = "mode = 'recharge' and status = 2";
+                $where['b.status'] = 2;
+                break;
+            case 4:
+                $where['b.status'] = 3;
                 break;
             default:
-                $where = "";
-                api_json(null,300,'type参数错误');
+                api_json(null,300,'state参数错误');
                 break;
         }
-        $data = M('trades a')->field('b.nickname,b.email,b.eth_address,b.mphone,a.*')->join('yt_users b on b.id = a.user_id')->where($where)->get();
-        api_json(data,200,'获取成功');
+        if($type == 1){
+            $data = M('trades a')->field('b.nickname,b.email,b.eth_address,b.mphone,a.id,a.eth,a.status,a.photo,a.create_time')
+                ->join('yt_users b on b.id = a.user_id');
+        }else{
+            $data = M('trades a')->field('b.nickname,b.email,b.eth_address,b.mphone,a.id,a.eth,a.status,a.create_time,c.beamount')
+                ->join('yt_payments c on c.trade_id = a.id')
+                ->join('yt_users b on b.id = a.user_id');
+        }
+        $data = $data->where($where)
+                ->limit($limit*($page-1), $limit)->order("a.id desc")->select();
+        $count =  M('trades a')->join('yt_users b on b.id = a.user_id')->where($where)->count();
+        api_json(array('data'=>$data,'count'=>empty($count)?$count:0),200,'获取成功');
+    }
+    /**
+     * 充值交易详情
+     */
+    public function checkDetails(){
+        $tradeId = I('tradeId');
+        $type = I('type',0,'int');
+        if(!in_array($type,[0,1])){
+            api_json(null,300,'type参数错误');
+        }
+        if($type == 1){
+            $where['mode'] = 'recharge';
+        }else{
+            $where['mode'] = 'cash';
+        }
+        $where['id'] = $tradeId;
+        $data = M('trades')->where($where)->find();
+        $return = array();
+        if($data){
+            $return['nickname'] = $data['nickname'];
+            $return['email'] = $data['email'];
+            $return['mphone'] = $data['mphone'];
+            $return['status'] = $data['status'];
+            $return['photo'] =  C('APPHOST').$data['photo'];
+            $return['eth'] = $data['eth'];
+            $return['eth_address'] = $data['eth_address'];
+            $return['create_time'] = $data['create_time'];
+        }
+        api_json($return, 200, '交易详情');
     }
 
 }
