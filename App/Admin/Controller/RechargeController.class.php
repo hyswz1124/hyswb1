@@ -174,7 +174,7 @@ class RechargeController extends CommonController {
         }
         switch($state){
             case 0:
-                $where['b.status'] = array('GT', 0);
+                $where['b.status'] = array('egt', 0);
                 break;
             case 1:
                 $where['b.status'] = 0;
@@ -193,17 +193,17 @@ class RechargeController extends CommonController {
                 break;
         }
         if($type == 1){
-            $data = M('trades a')->field('b.nickname,b.email,b.eth_address,b.mphone,a.id,a.eth,a.status,a.photo,a.create_time')
-                ->join('yt_users b on b.id = a.user_id');
+            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.eth,b.status,b.photo,b.create_time')
+                ->join('yt_users a on a.id = b.user_id');
         }else{
-            $data = M('trades a')->field('b.nickname,b.email,b.eth_address,b.mphone,a.id,a.eth,a.status,a.create_time,c.beamount')
-                ->join('yt_payments c on c.trade_id = a.id')
-                ->join('yt_users b on b.id = a.user_id');
+            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.eth,b.status,b.create_time,c.beamount')
+                ->join('yt_payments c on c.trade_id = b.id')
+                ->join('yt_users a on a.id = b.user_id');
         }
         $data = $data->where($where)
-                ->limit($limit*($page-1), $limit)->order("a.id desc")->select();
-        $count =  M('trades a')->join('yt_users b on b.id = a.user_id')->where($where)->count();
-        api_json(array('data'=>$data,'count'=>empty($count)?$count:0),200,'获取成功');
+            ->limit($limit*($page-1), $limit)->order("b.id desc")->select();
+        $count =  M('trades b')->join('yt_users a on a.id = b.user_id')->where($where)->count();
+        api_json(array('data'=>$data,'count'=>empty($count)?0:$count),200,'获取成功');
     }
     /**
      * 充值交易详情

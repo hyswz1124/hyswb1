@@ -232,7 +232,7 @@ class RechargeController extends CommonController {
             api_json(null,'300','充值eth数目不正确');
         }
 
-        M('trades')->startTrans();
+//        M('trades')->startTrans();
         try {
             $trade = [
                 'user_id' => $user['id'],
@@ -251,7 +251,7 @@ class RechargeController extends CommonController {
                 }
                 $trade['photo'] = $img['data'];
             }
- //充值改为直接通过
+            //充值改为直接通过
 //            $trade_id = M('trades')->add($trade);
 //          if($trade_id){
 //              $tradeId = $trade_id;
@@ -275,7 +275,7 @@ class RechargeController extends CommonController {
             }
 
         } catch (\Exception $e) {
-            M('trades')->rollback();
+//            M('trades')->rollback();
             api_json(null,'500',$e->getMessage());
         }
     }
