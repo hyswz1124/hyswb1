@@ -135,7 +135,7 @@ class RechargeController extends CommonController {
         if(!$userId){
             api_json(null,300,'操作的用户数据参数不足');
         }
-        $user = M('user')->where('id = {$userId}')->find();
+        $user = M('users')->where("id = {$userId}")->find();
         if(!$user){
             api_json(null,100,'操作的用户数据不存在');
         }
@@ -193,10 +193,10 @@ class RechargeController extends CommonController {
                 break;
         }
         if($type == 1){
-            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.eth,b.status,b.photo,b.create_time')
+            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.eth,b.status,b.photo,b.create_time')
                 ->join('yt_users a on a.id = b.user_id');
         }else{
-            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.eth,b.status,b.create_time,c.beamount')
+            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.eth,b.status,b.create_time,c.beamount')
                 ->join('yt_payments c on c.trade_id = b.id')
                 ->join('yt_users a on a.id = b.user_id');
         }
@@ -227,7 +227,7 @@ class RechargeController extends CommonController {
             $return['email'] = $data['email'];
             $return['mphone'] = $data['mphone'];
             $return['status'] = $data['status'];
-            $return['photo'] =  C('APPHOST').$data['photo'];
+            $return['photo'] = ($data['photo'])?C('APPHOST').$data['photo']:'';
             $return['eth'] = $data['eth'];
             $return['eth_address'] = $data['eth_address'];
             $return['create_time'] = $data['create_time'];
