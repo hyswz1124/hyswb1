@@ -78,6 +78,9 @@ class AdminController extends CommonController
         }
 
         $user = M('users')->find($this->adminid);
+        if(!$user){
+            api_json('', 500, '登录失效，请重新登录');
+        }
         $row=password_verify($old,$user['password']);
         if(!$row){
             api_json('', 400, '原始密码错误');
