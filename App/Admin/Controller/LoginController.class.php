@@ -22,7 +22,7 @@ class LoginController extends Controller {
         $where['status'] = 0;
         $where['is_admin'] = 1;
         $where['deleted'] = 0;
-        $field = 'id, nickname ,password, mphone, email';
+        $field = 'id, nickname ,password, mphone, email, token';
         $data = M('users')->where($where)->field($field)->find();
         if (!$data) {
             api_json('', 400, '用户不存在或者已被禁用');
