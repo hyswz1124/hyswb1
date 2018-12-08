@@ -51,7 +51,7 @@ class RechargeController extends CommonController {
         $tradeDB  = M('trades');
         $trade = $tradeDB->where("user_id = {$user['id']} and id={$tradeId} and status = 0 and mode = 'recharge'")->find();
         if(!$trade){
-            api_json(null,'100','该充值记录不存在');
+            api_json(null,'100','该充值记录不存在或已审核');
         }
         $result = M('trades')->where("id = {$tradeId}")->save(['status'=>3,'reason'=>$reason,'update_time' =>date('Y-m-d H:i:s',time())]);
         if($result){
