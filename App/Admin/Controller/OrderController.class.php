@@ -29,14 +29,14 @@ class OrderController extends CommonController {
         for ($i=1; $i<=$month; $i++){
             $where['create_time'] = array('like', '%' . date('Y-m', strtotime(date('Y-', time()).$i)) . '%');
             //按月统计
-            $yearArr[date('Y-m', strtotime(date('Y-', time()).$i))] = M('trades')->where($where)->sum('token');
+            $yearArr[date('Y-m', strtotime(date('Y-', time()).$i))] = empty(M('trades')->where($where)->sum('token'))?0:M('trades')->where($where)->sum('token');
         }
         $retuen['year'] = $yearArr;
         $day = date('d', time());
         for ($i=1; $i<=$day; $i++){
             //按天统计
             $where['create_time'] = array('like', '%' . date('Y-m-d', strtotime(date('Y-m-', time()).$i)) . '%');
-            $monthArr[date('Y-m-d', strtotime(date('Y-m-', time()).$i))] = M('trades')->where($where)->sum('token');
+            $monthArr[date('Y-m-d', strtotime(date('Y-m-', time()).$i))] = empty(M('trades')->where($where)->sum('token'))?0:M('trades')->where($where)->sum('token');
         }
         $retuen['month'] = $monthArr;
 
@@ -48,7 +48,7 @@ class OrderController extends CommonController {
                 $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).$i . '%');
             }
             //当天按小时统计
-            $dayArr[$i] = M('trades')->where($where)->sum('token');
+            $dayArr[$i] =empty(M('trades')->where($where)->sum('token'))?0:M('trades')->where($where)->sum('token');
         }
         $retuen['day'] = $dayArr;
 
