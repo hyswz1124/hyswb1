@@ -366,7 +366,7 @@ function order_settle($order,$current_user){
                 }
             }
         }
-        $rs = M('orders')->where('id='.$order['id'])->save(['status'=>1,'update_time' =>date('Y-m-d H:i:s',time())]);
+        $rs = M('orders')->where('id='.$order['id'])->save(['status'=>1,'related_id'=> $current_user['id'],'update_time' =>date('Y-m-d H:i:s',time())]);
         if($rs === false){
             $shiwu->rollback();
         }
@@ -771,7 +771,17 @@ function generate_order_no($postfix = '')
     $msec = round($usec * 1000);
     return date('YmdHis', time()) . $msec . $postfix;
 }
-
+/**
+ * 统计系统总积分
+ * author:wmt
+ * date:2018-10-24
+ */
+function total_token_count(){
+    $user_token = M('users')->where("deleted != '-1'")->sum('super_token');
+    $order_token = M('orders')->field('sum(token) as token_1,sum(eth) as token_2')->where('status = 0')->select();
+    $total_token = round($user_token + $order_token[0]['token_1'] + round($order_token[0]['token_2'] * 0.05,4),4);
+    return $total_token;
+}
 /**
  * 计算两个经纬度之间的距离
  * @param float $latitude1
