@@ -120,7 +120,8 @@
                 var password = $.trim($("#spassword").val());
                 var invite_code = $.trim($("#invite_code").val());
                 $.ajax({
-                    url: "__URL__/Login",
+                    url: "/Home/Index/Login",
+//                    url: "__URL__/Login",
                     type: "POST",
                     //dataType: "text",
                     // data: "phones=" + phone + "&code=" + code,
@@ -132,7 +133,8 @@
                     },
                     success: function (data) {
                         if (data.code == 200) {
-                            window.location.href="__URL__/Load";
+//                            window.location.href="__URL__/Load";
+                            window.location.href="/Home/Index/Load";
                         }else {
                             alert(data.message);
                         }
