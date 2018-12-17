@@ -12,6 +12,7 @@ class IndexController extends Controller
 
     public function __construct()
     {
+        parent::__construct();
 //        dd(decode('MhTyQs0MDAO0O0O'));
         $this->googleAuthenticator = new GoogleAuthenticatorModel();
 //        $this->secret = $this->googleAuthenticator->createSecret();
@@ -145,7 +146,12 @@ class IndexController extends Controller
     }
 
 
-    public function Invite(){
-        dd(12);
+    public function invite(){
+        $id = I('id');
+        if($id){
+            $data = M('users')->find($id);
+            $this->assign('data',$data);
+        }
+        $this->display();
     }
 }
