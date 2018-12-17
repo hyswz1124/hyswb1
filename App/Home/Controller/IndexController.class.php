@@ -214,8 +214,7 @@ class IndexController extends Controller
                     $this->node_reward($super, $poration);
                 }
             }
-            $this->display('load');
-            echo api_json(1, 200, ' 注册成功');
+            echo api_json(null, 200, ' 注册成功');
         }
     }
 
