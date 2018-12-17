@@ -1,4 +1,5 @@
 <?php
+
 namespace Home\Controller;
 
 use Common\Model\GoogleAuthenticatorModel;
@@ -23,14 +24,15 @@ class IndexController extends Controller
         $googleAuthenticator = new GoogleAuthenticatorModel();
 
         $user = I('phone');
-        if(!preg_match('/1[0-9]{10}/', $user) || strlen($user) != 11) {
-            echo api_json(null,'400','手机号码格式不正确');exit();
+        if (!preg_match('/1[0-9]{10}/', $user) || strlen($user) != 11) {
+            echo api_json(null, '400', '手机号码格式不正确');
+            exit();
         }
-        $is = M('googleAuth')->where('phone='.$user)->find();
+        $is = M('googleAuth')->where('phone=' . $user)->find();
         $rs = true;
-        if($is){
+        if ($is) {
             $secret = $is['secret'];
-        }else{
+        } else {
             $secret = $googleAuthenticator->createSecret();
             $add['phone'] = $user;
             $add['secret'] = $secret;
@@ -38,11 +40,11 @@ class IndexController extends Controller
             $rs = M('yt_google_auth')->add($add);
         }
         $qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('ETHCODE', $secret);
-        if(!$rs){
+        if (!$rs) {
             api_json('', 500, '获取失败，请重试');
         }
         api_json($qrCodeUrl, 200, '获取成功');
-        echo "Google Charts URL for the QR-Code: ".$qrCodeUrl."</br>";
+        echo "Google Charts URL for the QR-Code: " . $qrCodeUrl . "</br>";
         $oneCode = $googleAuthenticator->getCode($secret);
         echo "Checking Code '$oneCode' and Secret '$secret':</br>";
         $checkResult = $googleAuthenticator->verifyCode($secret, $oneCode, 2);    // 2 = 2*30sec clock tolerance
@@ -55,7 +57,7 @@ class IndexController extends Controller
 //        $secret = $google->createSecret();
 //        echo "Secret is: ".$secret."</br>";
         $qrCodeUrl = $this->googleAuthenticator->getQRCodeGoogleUrl('Blog', $this->secret);
-        echo "Google Charts URL for the QR-Code: ".$qrCodeUrl."</br>";
+        echo "Google Charts URL for the QR-Code: " . $qrCodeUrl . "</br>";
         $oneCode = $this->googleAuthenticator->getCode($this->secret);
         echo "Checking Code '$oneCode' and Secret '$this->secret':</br>";
         $checkResult = $this->googleAuthenticator->verifyCode($this->secret, $oneCode, 2);    // 2 = 2*30sec clock tolerance
@@ -65,19 +67,20 @@ class IndexController extends Controller
             echo 'FAILED';
         }
         exit();
-        $rec = $this->think_send_mail('1140977015@qq.com','wmt','你是sb','你是sb！');
+        $rec = $this->think_send_mail('1140977015@qq.com', 'wmt', '你是sb', '你是sb！');
         var_dump($rec);
 //        $this->display('index');
     }
 
 
-    public function think_send_mail($to, $name, $subject = '', $body = '', $attachment = null){
+    public function think_send_mail($to, $name, $subject = '', $body = '', $attachment = null)
+    {
 
         $config = C('THINK_EMAIL');
         vendor('PHPMailer.class#phpmailer');
         vendor('SMTP');
-        require __DIR__.'/../../..//vendor/PHPMailer/class.phpmailer.php';
-        require __DIR__.'/../../..//vendor/SMTP.php';
+        require __DIR__ . '/../../..//vendor/PHPMailer/class.phpmailer.php';
+        require __DIR__ . '/../../..//vendor/SMTP.php';
         $mail = new \PHPMailer(); //PHPMailer对象
 //        $mail->SMTPOptions = array(
 //            'ssl' => array(
@@ -103,9 +106,9 @@ class IndexController extends Controller
 
         $mail->SetFrom($config['FROM_EMAIL'], $config['FROM_NAME']);
 
-        $replyEmail = $config['REPLY_EMAIL']?$config['REPLY_EMAIL']:$config['FROM_EMAIL'];
+        $replyEmail = $config['REPLY_EMAIL'] ? $config['REPLY_EMAIL'] : $config['FROM_EMAIL'];
 
-        $replyName = $config['REPLY_NAME']?$config['REPLY_NAME']:$config['FROM_NAME'];
+        $replyName = $config['REPLY_NAME'] ? $config['REPLY_NAME'] : $config['FROM_NAME'];
 
         $mail->AddReplyTo($replyEmail, $replyName);
 //        $mail -> IsHTML(true);            //发送的内容使用html编写
@@ -131,9 +134,9 @@ class IndexController extends Controller
 //        $mail -> MsgHTML($body);    //发送的邮件内容主体
 //        $mail -> AddAddress($to,$name);    //收人的邮件地址
 
-        if(is_array($attachment)){ // 添加附件
+        if (is_array($attachment)) { // 添加附件
 
-            foreach ($attachment as $file){
+            foreach ($attachment as $file) {
 
                 is_file($file) && $mail->AddAttachment($file);
 
@@ -146,12 +149,128 @@ class IndexController extends Controller
     }
 
 
-    public function invite(){
+    public function invite()
+    {
         $id = I('id');
-        if($id){
+        if ($id) {
             $data = M('users')->find($id);
-            $this->assign('data',$data);
+            $this->assign('data', $data);
         }
+        $this->display();
+    }
+
+    public function Login()
+    {
+        echo api_json(1, 200, ' 注册成功');
+
+
+        $user = I('user', '', 'trim');
+        $passwd = I('pwd', '', 'trim');
+        $phone_code = I('phone_code');
+        $checkpwd = I('checkpwd');
+        $name = I('name');
+        $invitation_code = I('invitation_code');
+        if (empty($user) || empty($passwd)) {
+            $code = '300';
+            echo api_json(null, 300, '参数为空');
+            exit();
+        }
+        //过滤匹配
+        if (!preg_match('/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/', $user)) {
+            $data['user'] = $user;
+            $data['eth_address'] = $user;
+        } else {
+            $data['email'] = $user;
+        }
+
+//        if (strlen($passwd) < 6 || strlen($passwd) > 20 || $passwd != $checkpwd) {
+//            echo api_json(null,'400','密码输入有误');exit();
+//        }
+//        if (mb_strlen($name, 'UTF8') < 2 || mb_strlen($name, 'UTF8') > 20) {
+//            echo api_json(null,'400','用户名长度不符');exit();
+//        }
+        $iswhere['email|mphone|eth_address'] = $user;
+        $user = M('users')->where($iswhere)->find();
+        if ($user) {
+            echo api_json(null, '400', '该手机号已注册');
+            exit();
+        }
+        $data['password'] = password_hash($passwd, PASSWORD_DEFAULT);
+//        $data['code'] = $this->initcode();
+        $data['create_time'] = datetimenew();
+        if ($invitation_code) {
+            $super = M('users')->field('id,one_superid,eth,node_earnings,dividend_earnings')->where('code=%d and deleted = 0 and status =0', $invitation_code)->find();
+            if ($super) {
+                $data['one_superid'] = $super['id'];
+                $data['two_superid'] = $super['one_superid'];
+//                $poration = $this->get_node_level($super['id']);
+            }
+        }
+        $result = M('users')->add($data);
+        if (!$result) {
+            $code = '500';
+            echo api_json(null, $code, '注册失败');
+            $code = '200';
+            if (isset($super) && $super) {
+                $poration = $this->get_node_level($super['id']);
+                if ($poration) {
+                    $this->node_reward($super, $poration);
+                }
+            }
+            $this->display('load');
+            echo api_json(1, 200, ' 注册成功');
+        }
+    }
+
+    /**
+     * 获取节点奖励的级别
+     *
+     */
+    public function get_node_level($super_id)
+    {
+        $num = M('users')->where('one_superid=' . $super_id)->count();
+        $node = M('node_pool_dispose')->where("status = 1 and ((type = 0 and num = {$num}) or (type = 1 and num < {$num}))")->find();
+        if ($node && $node['proportion']) {
+            $poration = $node['proportion'];
+        } else {
+            $poration = 0;
+        }
+
+        return $poration;
+    }
+
+
+    /**
+     * 节点奖励分红
+     * author:wmt
+     * date:2018-10-19
+     */
+    public function node_reward($user, $poration)
+    {
+        $amount = M('bonus_pool')->where('type = 1')->getField('eth');
+        $trade['user_id'] = $user['id'];
+        $trade['related_id'] = 0;
+        //                $trade['trade_ids'] = '{' . $order['trade_id'] . '}';
+        $trade['mode'] = 'income_node_reward';
+        $trade['message'] = '邀请节点奖励收入';
+        $trade['eth'] = $amount * 0.9 * $poration / 100;
+        $trade['status'] = 1;
+        $trade_ids = M('trades')->add($trade);
+        if ($trade_ids) {
+            $payment['trade_id'] = $trade_ids;
+            $payment['mode'] = 'eth';
+            $payment['beamount'] = $user['eth'];
+            $payment['afamount'] = ($user['eth']) + $trade['eth'];
+            $payment['eth'] = $trade['eth'];
+            $payment['status'] = 1;
+            M('payments')->add($payment);
+            M('users')->where("id =" . $user['id'])->save(['eth' => ($user['eth']) + $trade['eth'], 'dividend_earnings' => ($user['dividend_earnings'] + $trade['eth']), 'node_earnings' => ($user['node_earnings'] + $trade['eth']), 'update_time' => date('Y-m-d H:i:s', time())]);
+            M('bonus_pool')->where('type = 1')->save(['eth' => ($amount - $trade['eth']), 'update_time' => date('Y-m-d H:i:s', time())]);
+        }
+
+    }
+
+    public function Load(){
         $this->display();
     }
 }

@@ -28,12 +28,12 @@ select{
 select{
     color: #fff!important;
 }
-/*ÒøÐÐ¿¨µÄÀà*/
+/*ï¿½ï¿½ï¿½Ð¿ï¿½ï¿½ï¿½ï¿½ï¿½*/
 .card_1{background: #00CC99;}
 .card_2{background: #DD524D;}
 .card_3{background: #4D94FF;}
 .card_4{background: #8A6DE9;}
-/*flex²¼¾Ö*/
+/*flexï¿½ï¿½ï¿½ï¿½*/
 .df{display: flex;justify-content: space-between;align-items: center;}
 .df1{display: flex;justify-content: flex-start;align-items: center;}
 
@@ -57,7 +57,7 @@ select{
 .b_shadow{
     box-shadow:0px 2px 9px 0px rgba(213,213,213,0.5);
 }
-/*ÄÚÍâ±ß¾à*/
+/*ï¿½ï¿½ï¿½ï¿½ß¾ï¿½*/
 .mt88{margin-top: 0.88rem;}
 .mt8{margin-top: 0.8rem;}
 .mt76{margin-top: 0.76rem;}
@@ -104,7 +104,7 @@ select{
 .bt_c3{border-top: 1px solid rgba(234,238,248,1);}
 .bt_c4{border-top: 1px solid rgba(105,120,146,1);}
 .h088{height: 0.88rem;line-height: 0.88rem;}
-/*×ÖºÅ*/
+/*ï¿½Öºï¿½*/
 .fs-10{font-size:0.2rem;}
 .fs-13{font-size:0.26rem;}
 .fs-14{font-size:0.28rem;}
@@ -120,25 +120,25 @@ select{
 .fs-white{
     font-size:0.28rem;font-weight:500;color:rgba(255,255,255,1);
 }
-/*Í·²¿*/
+/*Í·ï¿½ï¿½*/
 header{height:0.88rem;line-height: 0.88rem;position: fixed;top:0;left:0;right:0;background: #1859E0;z-index: 9;transition: all .3s ease;}
 header .icon{position: absolute;top:0rem;left: 0.31rem;height: 0.88rem;text-align: center;display: block;}
 header .icon1{position: absolute;top:0rem;right: 0.31rem;height: 0.88rem;text-align: center;display: block;}
 /*header .back{left:0;}*/
 header input{background: #F4F4F4;border-radius: 0.44rem;height: 0.7rem;margin-left: 0.8rem;padding-left: 1rem;width: 5.6rem;}
-header .back i{background:url(image/back.png) no-repeat;display: inline-block;width: 0.16rem;height:0.28rem;background-size:cover;margin-top: 0.22rem;}
+header .back i{background:url(images/back.png) no-repeat;display: inline-block;width: 0.16rem;height:0.28rem;background-size:cover;margin-top: 0.22rem;}
 /*header .i-right{right:0;}*/
 header .i-right.i-text{width:auto;padding:0 0.24rem;}
 header .i-right i{display:inline-block;}
 header h1{text-align: center;margin:0 0.88rem;font-size:0.36rem;font-weight: 500 ;line-height: inherit;color: #fff;}
-/*µÇÂ¼×¢²á*/
+/*ï¿½ï¿½Â¼×¢ï¿½ï¿½*/
 body{
     background: #fff;
 }
 #login_dialog {
     width: 100%;
-    font-family: "ºÚÌå";
-    /*½ûÖ¹¸´ÖÆÕ³Ìù*/
+    font-family: "ï¿½ï¿½ï¿½ï¿½";
+    /*ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½Õ³ï¿½ï¿½*/
     -moz-user-select: none;
     -webkit-user-select: none;
     user-select: none;
@@ -196,7 +196,7 @@ header{
     margin: 0.5rem 0;}
 .ml_04{
     margin-left: 0.4rem;}
-/*¸´Ñ¡¿ò*/
+/*ï¿½ï¿½Ñ¡ï¿½ï¿½*/
 label {font-size:0.28rem;}
 label i {font-size:0.28rem;font-style:normal;display:inline-block;width:0.3rem;height:0.3rem;text-align:center;line-height:0.3rem;color:#fff;vertical-align:middle;margin:-2px 2px 1px 0px;border:1px solid rgba(31,47,74,1);}
 input[type="checkbox"]{display:none;}
@@ -209,7 +209,7 @@ input[type="checkbox"]:checked + i{background:#ff3148;border:1px solid #ff3148;}
     font-family:STHeitiTC-Medium;
     font-weight:500;
 }
-/*×¢²áÐ­Òé*/
+/*×¢ï¿½ï¿½Ð­ï¿½ï¿½*/
 .agree_list>li{
     font-size: 0.24rem;
     font-family:STHeitiTC-Light;
@@ -236,6 +236,6 @@ input[type="checkbox"]:checked + i{background:#ff3148;border:1px solid #ff3148;}
     font-size: 0.32rem;
     letter-spacing: 1px;
 }
-.phone_1{background:url(image/ic_shouji_hei.png) no-repeat;display: inline-block;width: 0.28rem;height:0.44rem;background-size:cover;vertical-align: middle;}
-.psw_1{background:url(image/ic_mima_hei2.png) no-repeat;display: inline-block;width: 0.33rem;height:0.39rem;background-size:cover;vertical-align: middle;}
-.user_1{background:url(image/ic_yangzhengma_hei2.png) no-repeat;display: inline-block;width: 0.34rem;height:0.38rem;background-size:cover;vertical-align: middle;}
+.phone_1{background:url(images/ic_shouji_hei.png) no-repeat;display: inline-block;width: 0.28rem;height:0.44rem;background-size:cover;vertical-align: middle;}
+.psw_1{background:url(images/ic_mima_hei2.png) no-repeat;display: inline-block;width: 0.33rem;height:0.39rem;background-size:cover;vertical-align: middle;}
+.user_1{background:url(images/ic_yangzhengma_hei2.png) no-repeat;display: inline-block;width: 0.34rem;height:0.38rem;background-size:cover;vertical-align: middle;}
