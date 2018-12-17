@@ -1,17 +1,75 @@
 <?php
 namespace Home\Controller;
 
+use Common\Model\GoogleAuthenticatorModel;
 use Think\Controller;
+use Think\View;
 
 class IndexController extends Controller
 {
+    protected $googleAuthenticator;
+    protected $secret = '2SNCHX2PSENUKQSN';
+
+    public function __construct()
+    {
+//        dd(decode('MhTyQs0MDAO0O0O'));
+        $this->googleAuthenticator = new GoogleAuthenticatorModel();
+//        $this->secret = $this->googleAuthenticator->createSecret();
+    }
+
     public function index()
     {
-        var_dump(225);exit();
+        $googleAuthenticator = new GoogleAuthenticatorModel();
+
+        $user = I('phone');
+        if(!preg_match('/1[0-9]{10}/', $user) || strlen($user) != 11) {
+            echo api_json(null,'400','手机号码格式不正确');exit();
+        }
+        $is = M('googleAuth')->where('phone='.$user)->find();
+        $rs = true;
+        if($is){
+            $secret = $is['secret'];
+        }else{
+            $secret = $googleAuthenticator->createSecret();
+            $add['phone'] = $user;
+            $add['secret'] = $secret;
+            $add['create_time'] = datetimenew();
+            $rs = M('yt_google_auth')->add($add);
+        }
+        $qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('ETHCODE', $secret);
+        if(!$rs){
+            api_json('', 500, '获取失败，请重试');
+        }
+        api_json($qrCodeUrl, 200, '获取成功');
+        echo "Google Charts URL for the QR-Code: ".$qrCodeUrl."</br>";
+        $oneCode = $googleAuthenticator->getCode($secret);
+        echo "Checking Code '$oneCode' and Secret '$secret':</br>";
+        $checkResult = $googleAuthenticator->verifyCode($secret, $oneCode, 2);    // 2 = 2*30sec clock tolerance
+        if ($checkResult) {
+            echo 'OK';
+        } else {
+            echo 'FAILED';
+        }
+        exit;
+//        $secret = $google->createSecret();
+//        echo "Secret is: ".$secret."</br>";
+        $qrCodeUrl = $this->googleAuthenticator->getQRCodeGoogleUrl('Blog', $this->secret);
+        echo "Google Charts URL for the QR-Code: ".$qrCodeUrl."</br>";
+        $oneCode = $this->googleAuthenticator->getCode($this->secret);
+        echo "Checking Code '$oneCode' and Secret '$this->secret':</br>";
+        $checkResult = $this->googleAuthenticator->verifyCode($this->secret, $oneCode, 2);    // 2 = 2*30sec clock tolerance
+        if ($checkResult) {
+            echo 'OK';
+        } else {
+            echo 'FAILED';
+        }
+        exit();
         $rec = $this->think_send_mail('1140977015@qq.com','wmt','你是sb','你是sb！');
         var_dump($rec);
 //        $this->display('index');
     }
+
+
     public function think_send_mail($to, $name, $subject = '', $body = '', $attachment = null){
 
         $config = C('THINK_EMAIL');
@@ -84,5 +142,10 @@ class IndexController extends Controller
 
         return $mail->Send() ? true : $mail->ErrorInfo;
 
+    }
+
+
+    public function Invite(){
+        dd(12);
     }
 }
