@@ -8,6 +8,7 @@ class OrderController extends CommonController {
      * 此方法程序为管理员挂单 以及市场挂单记录
      */
     protected $adminInfo = 1;
+    public static $total_token = 1000000000;
 
     public function __construct()
     {

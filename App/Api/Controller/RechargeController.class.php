@@ -140,6 +140,7 @@ class RechargeController extends CommonController {
         M('trades')->startTrans();
         $trade = [
             'user_id' => $user['id'],
+            'order_no'=>generate_order_no(),
             'mode' => 'cash',
             'related_id' => $this->systemId,
             'message' => '用户提现',
@@ -236,6 +237,7 @@ class RechargeController extends CommonController {
         try {
             $trade = [
                 'user_id' => $user['id'],
+                'order_no'=>generate_order_no(),
                 'mode' => 'recharge',
                 'related_id' => $this->systemId,
                 'message' => '用户充值',
