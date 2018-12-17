@@ -161,8 +161,6 @@ class IndexController extends Controller
 
     public function Login()
     {
-        echo api_json(null, 200, ' 注册成功');
-
         $user = I('user', '', 'trim');
         $passwd = I('pwd', '', 'trim');
         $phone_code = I('phone_code');
