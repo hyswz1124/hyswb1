@@ -78,6 +78,7 @@
 </script>
 <script type="text/javascript">
     $(function () {
+
         //密码验证
         $("#rpassword").blur(function () {
             var spassword = $("#spassword").val();
@@ -94,6 +95,9 @@
 
         //手机号验证
         $("#siginup").click(function () {
+
+            window.location.href="/Home/Index/Load";
+
             //勾选注册协议
             if (checked.checked == true) {
             } else {
@@ -134,7 +138,6 @@
                     success: function (data) {
                         console.log(data);
                         if (data.code == '200') {
-//                            window.location.href="__URL__/Load";
                             window.location.href="/Home/Index/Load";
                         }else {
                             alert(data.message);
