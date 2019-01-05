@@ -40,7 +40,7 @@ class OrdersController extends CommonController
         $retuen['month'] = $monthArr;
 
         $hour = date('H', time());
-        for ($i=1; $i<=$hour; $i++){
+        for ($i=0; $i<=$hour; $i++){
             if($i < 10){
                 $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).'0'.$i . '%');
             }else{
@@ -86,7 +86,7 @@ class OrdersController extends CommonController
             'message' => '用户挂单',
             'status' => 0,
             'token'=>$super_token,
-            'eth' => $eth
+            'eth' => $eth,
         ];
         $order_id = $model->add($order);
             $trade = [
@@ -97,7 +97,7 @@ class OrdersController extends CommonController
                 'message' => '用户挂单',
                 'status' => 1,
                 'token'=>$super_token,
-                'eth' => $eth
+                'eth' => $eth,
             ];
             $trade_id = M('trades')->add($trade);
         if(!$trade_id){
@@ -124,7 +124,7 @@ class OrdersController extends CommonController
             'mphone'=>$user['mphone'],
             'email'=>$user['email'],
             'order_no'=>$order['order_no'],
-            'eth'=>$order['token'],
+            'eth'=>$order['eth'],
             'token'=>$order['token']
         ];
         api_json($data,'200','挂单成功');
