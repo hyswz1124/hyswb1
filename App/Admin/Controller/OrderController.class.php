@@ -42,7 +42,7 @@ class OrderController extends CommonController {
         $retuen['month'] = $monthArr;
 
         $hour = date('H', time());
-        for ($i=1; $i<=$hour; $i++){
+        for ($i=0; $i<=$hour; $i++){
             if($i < 10){
                 $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).'0'.$i . '%');
             }else{
