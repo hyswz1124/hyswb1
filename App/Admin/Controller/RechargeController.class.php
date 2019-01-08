@@ -202,6 +202,13 @@ class RechargeController extends CommonController {
         }
         $data = $data->where($where)
             ->limit($limit*($page-1), $limit)->order("b.id desc")->select();
+        if($data){
+            foreach ($data as &$v){
+                if($v['photo']){
+                    $v['photo'] = C('APPHOST').$v['photo'];
+                }
+            }
+        }
         $count =  M('trades b')->join('yt_users a on a.id = b.user_id')->where($where)->count();
         api_json(array('data'=>$data,'count'=>empty($count)?0:$count),200,'获取成功');
     }
