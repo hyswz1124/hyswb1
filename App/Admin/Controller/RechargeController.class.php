@@ -205,7 +205,7 @@ class RechargeController extends CommonController {
         if($data){
             foreach ($data as &$v){
                 if($v['photo']){
-                    $v['photo'] = C('APPHOST').$v['photo'];
+                    $v['photo'] = C('PATHHOST').$v['photo'];
                 }
             }
         }
