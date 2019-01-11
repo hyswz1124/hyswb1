@@ -196,7 +196,7 @@ class RechargeController extends CommonController {
             $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.order_no,b.eth,b.status,b.photo,b.create_time')
                 ->join('yt_users a on a.id = b.user_id');
         }else{
-            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.order_no,b.eth,b.status,b.photo,b.create_time,c.beamount')
+            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.order_no,b.eth,b.status,b.create_time,c.beamount')
                 ->join('yt_payments c on c.trade_id = b.id')
                 ->join('yt_users a on a.id = b.user_id');
         }
