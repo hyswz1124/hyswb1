@@ -253,7 +253,7 @@ class RechargeController extends CommonController {
                 }
                 $trade['photo'] = $img['data'];
             }else{
-                api_json(null,'500','缺少上传凭证');
+//                api_json(null,'500','缺少上传凭证');
             }
             //充值改为直接通过
 //            $trade_id = M('trades')->add($trade);
