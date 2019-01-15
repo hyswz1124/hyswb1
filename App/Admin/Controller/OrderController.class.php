@@ -49,7 +49,7 @@ class OrderController extends CommonController {
                 $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).$i . '%');
             }
             //当天按小时统计
-            $dayArr[$i] =empty(M('trades')->where($where)->sum('token'))?0:M('trades')->where($where)->sum('token');
+            $dayArr[$i+1] =empty(M('trades')->where($where)->sum('token'))?0:M('trades')->where($where)->sum('token');
         }
         $retuen['day'] = $dayArr;
 

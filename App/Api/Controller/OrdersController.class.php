@@ -47,7 +47,7 @@ class OrdersController extends CommonController
                 $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).$i . '%');
             }
             //当天按小时统计
-            $dayArr[$i] = M('trades')->where($where)->count();
+            $dayArr[$i+1] = M('trades')->where($where)->count();
         }
         $retuen['day'] = $dayArr;
 

@@ -224,12 +224,13 @@ class RechargeController extends CommonController {
             api_json(null,300,'type参数错误');
         }
         if($type == 1){
-            $where['mode'] = 'recharge';
+            $where['b.mode'] = 'recharge';
         }else{
-            $where['mode'] = 'cash';
+            $where['b.mode'] = 'cash';
         }
-        $where['id'] = $tradeId;
-        $data = M('trades')->where($where)->find();
+        $where['b.id'] = $tradeId;
+        $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.mode,b.order_no,b.eth,b.status,b.photo,b.create_time')
+            ->join('yt_users a on a.id = b.user_id')->where($where)->find();
         $return = array();
         if($data){
             $return['nickname'] = $data['nickname'];
