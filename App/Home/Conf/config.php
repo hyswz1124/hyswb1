@@ -7,18 +7,20 @@ return array(
 
         'SMTP_PORT' => '25', //SMTP服务器端口
 
-        'SMTP_USER' => 'noreply@cholding.com.cn', //SMTP服务器用户名
-
-        'SMTP_PASS' => 'Chh@2016', //SMTP服务器密码
-
-        'FROM_EMAIL' => 'noreply@cholding.com.cn',
-
-        'FROM_NAME' => '长合汽车', //发件人名称
 
         'REPLY_EMAIL' => '', //回复EMAIL（留空则为发件人EMAIL）
 
         'REPLY_NAME' => '', //回复名称（留空则为发件人名称）
 
         'SESSION_EXPIRE'=>'72',
+    ),
+
+    'TMPL_PARSE_STRING' => array(
+        '__PUBLIC__'    => '/Public/web/', // 更改默认的/Public 替换规则
+        '__JS__'        => '/Public/web/js/', // 增加新的JS类库路径替换规则
+        '__CSS__'       => '/Public/web/css', // 增加新的css路径替换规则
+        '__IMAGES__'    => '/Public/web/images/', // 增加新的images路径替换规则
+        '__LAYER__'     => '/Public/web/layer/', // 增加新的images路径替换规则
+        '__BOOTSTRAP__' => '/Public/web/bootstrap-3.3.5/',
     ),
 );

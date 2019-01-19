@@ -254,6 +254,10 @@ class UserController extends CommonController
                     $add['next_mphone'] = $is['mphone'];
                     $add['next_email'] = $is['email'];
                     $add['next_eth_address'] = $is['eth_address'];
+                }else{
+                    $add['next_mphone'] = '';
+                    $add['next_email'] = '';
+                    $add['next_eth_address'] = '';
                 }
                 $add['time'] = $value['create_time'];
                 $return['list'][] = $add;

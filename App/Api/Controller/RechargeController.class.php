@@ -140,6 +140,7 @@ class RechargeController extends CommonController {
         M('trades')->startTrans();
         $trade = [
             'user_id' => $user['id'],
+            'order_no'=>generate_order_no(),
             'mode' => 'cash',
             'related_id' => $this->systemId,
             'message' => '用户提现',
@@ -236,6 +237,7 @@ class RechargeController extends CommonController {
         try {
             $trade = [
                 'user_id' => $user['id'],
+                'order_no'=>generate_order_no(),
                 'mode' => 'recharge',
                 'related_id' => $this->systemId,
                 'message' => '用户充值',
@@ -250,6 +252,8 @@ class RechargeController extends CommonController {
                     api_json(null,'500',$img['data']);
                 }
                 $trade['photo'] = $img['data'];
+            }else{
+//                api_json(null,'500','缺少上传凭证');
             }
             //充值改为直接通过
 //            $trade_id = M('trades')->add($trade);

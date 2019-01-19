@@ -193,15 +193,24 @@ class RechargeController extends CommonController {
                 break;
         }
         if($type == 1){
-            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.eth,b.status,b.photo,b.create_time')
+            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.order_no,b.eth,b.status,b.photo,b.create_time')
                 ->join('yt_users a on a.id = b.user_id');
         }else{
-            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.eth,b.status,b.create_time,c.beamount')
+            $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.order_no,b.eth,b.status,b.create_time,c.beamount')
                 ->join('yt_payments c on c.trade_id = b.id')
                 ->join('yt_users a on a.id = b.user_id');
         }
         $data = $data->where($where)
             ->limit($limit*($page-1), $limit)->order("b.id desc")->select();
+        if($data){
+            foreach ($data as &$v){
+                if($v['photo']){
+                    $v['photo'] = C('PATHHOST').$v['photo'];
+                }else{
+                    $v['photo'] = '';
+                }
+            }
+        }
         $count =  M('trades b')->join('yt_users a on a.id = b.user_id')->where($where)->count();
         api_json(array('data'=>$data,'count'=>empty($count)?0:$count),200,'获取成功');
     }
@@ -215,12 +224,13 @@ class RechargeController extends CommonController {
             api_json(null,300,'type参数错误');
         }
         if($type == 1){
-            $where['mode'] = 'recharge';
+            $where['b.mode'] = 'recharge';
         }else{
-            $where['mode'] = 'cash';
+            $where['b.mode'] = 'cash';
         }
-        $where['id'] = $tradeId;
-        $data = M('trades')->where($where)->find();
+        $where['b.id'] = $tradeId;
+        $data = M('trades b')->field('a.nickname,a.email,a.eth_address,a.mphone,b.id,b.user_id,b.mode,b.order_no,b.eth,b.status,b.photo,b.create_time')
+            ->join('yt_users a on a.id = b.user_id')->where($where)->find();
         $return = array();
         if($data){
             $return['nickname'] = $data['nickname'];

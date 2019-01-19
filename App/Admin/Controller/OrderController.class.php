@@ -8,6 +8,7 @@ class OrderController extends CommonController {
      * 此方法程序为管理员挂单 以及市场挂单记录
      */
     protected $adminInfo = 1;
+    public static $total_token = 1000000000;
 
     public function __construct()
     {
@@ -41,14 +42,14 @@ class OrderController extends CommonController {
         $retuen['month'] = $monthArr;
 
         $hour = date('H', time());
-        for ($i=1; $i<=$hour; $i++){
+        for ($i=0; $i<=$hour; $i++){
             if($i < 10){
                 $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).'0'.$i . '%');
             }else{
                 $where['create_time'] = array('like', '%' . date('Y-m-d ', time()).$i . '%');
             }
             //当天按小时统计
-            $dayArr[$i] =empty(M('trades')->where($where)->sum('token'))?0:M('trades')->where($where)->sum('token');
+            $dayArr[$i+1] =empty(M('trades')->where($where)->sum('token'))?0:M('trades')->where($where)->sum('token');
         }
         $retuen['day'] = $dayArr;
 

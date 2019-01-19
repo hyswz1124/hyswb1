@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <meta content="email=no" name="format-detection">
+    <meta name="description" content="不超过150个字符"/>
+    <meta name="keywords" content=""/>
+    <title>注册</title>
+    <link rel="stylesheet" href="__CSS__/name.css"/>
+    <script src="__JS__/flexible.min.js" type="text/javascript" charset="utf-8"></script>
+</head>
+
+<body>
+<header>
+    <a class="back icon" href="javascript:history.go(-1)">
+        <i></i>
+    </a>
+</header>
+<div id="register_dialog" class="pt88">
+    <div class="mtb_05 tc">
+        <img src="__IMAGES__/tubiao1.jpg" style="width: 1.5rem;height: 1.5rem;border-radius: 50%;">
+        <div class="head_title">宇橙</div>
+    </div>
+    <div>
+        <form action="" id="registerForm">
+            <ul class="reg-box">
+                <li class="oh">
+                    <span class="phone_1 mr03"></span>
+                    <input type="text" class="sradd phonekey phone" name="tel" id="phone" placeholder="请输入手机号"
+                           maxlength="11" style="width:2rem;"/>
+                </li>
+                <li>
+                    <span class="psw_1 mr03"></span>
+                    <input type="password" class="password" placeholder="请输入密码" id="spassword" name="passwd"/>
+                </li>
+                <li>
+                    <span class="psw_1 mr03"></span>
+                    <input type="password" class="pasw" placeholder="请再次输入密码" id="rpassword"/>
+                </li>
+                <li>
+                    <span class="psw_1 mr03"></span>
+                    <input type="text" readonly="readonly" placeholder="请输入邀请码" id="invite_code" name="invite_code" value="{$data.code}" />
+                </li>
+            </ul>
+            <div class="ml_04">
+                <label>
+                    <input type="checkbox" id="checked">
+                    <i>✓</i>
+                    <b class="mlr02 register_agreement">
+                        <a href="registrationAgreement.html">同意用户协议和隐私协议</a>
+                    </b>
+                </label>
+            </div>
+            <div class="tc">
+                <button type="button" class="load" id="siginup" style="width: 6rem;"/>
+                确定</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="__JS__/jquery-2.1.3.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="__JS__/md5.js" type="text/javascript" charset="utf-8"></script>
+<script type="application/javascript">
+
+    (function ($) {
+        $.getUrlParam = function (name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+    })(jQuery);
+
+</script>
+<script type="text/javascript">
+    $(function () {
+
+        //密码验证
+        $("#rpassword").blur(function () {
+            var spassword = $("#spassword").val();
+            var rpassword = $("#rpassword").val();
+            if (spassword != rpassword) {
+                alert("您输入的新密码与确认密码不一致");
+                return false;
+            }
+            return true;
+
+        })
+        var checked = document.getElementById("checked");
+        var siginup = document.getElementById("siginup");
+
+        //手机号验证
+        $("#siginup").click(function () {
+
+            //勾选注册协议
+            if (checked.checked == true) {
+            } else {
+                alert("请勾选注册协议");
+                return false;
+            }
+
+            var formData = $("#registerForm").serialize();
+            var phones = $.trim($("#phone").val());
+            var isMobile = /^(((13[0-9]{1})|(17[0-9]{1})|(19[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/;
+            if (!phones) {
+                alert('请输入手机号码，不能为空');
+                return false;
+            } else if (!isMobile.test(phones)) {
+                alert('请输入有效的手机号码');
+                return false;
+            } else if (!$.trim($("#spassword").val())) {
+                alert('请输入密码，不能为空');
+                return false;
+            }else if (!$.trim($("#invite_code").val())) {
+                alert('请输入邀请码，不能为空');
+                return false;
+            } else {
+                var password = $.trim($("#spassword").val());
+                var invite_code = $.trim($("#invite_code").val());
+                $.ajax({
+                    url: "/Home/Index/Login",
+//                    url: "__URL__/Login",
+                    type: "POST",
+                    //dataType: "text",
+                    // data: "phones=" + phone + "&code=" + code,
+                    dataType: "JSON",
+                    data: {
+                        user: phones,
+                        pwd: password,
+                        invitation_code: invite_code
+                    },
+                    success: function (data) {
+                        if (data.code == '200') {
+                            window.location.href="/Home/Index/Load";
+                        }else {
+                            alert(data.message);
+                        }
+                    }
+                });
+            }
+        })
+        //验证码倒计时
+        var InterValObj; //timer变量，控制时间
+        var count = 120; //间隔函数，1秒执行
+        var curCount; //当前剩余秒数
+        var regType;
+        var codeLength = 4; //验证码长度
+        $(".code-btn").click(function () {
+            curCount = count;
+            var phone = $.trim($(".phone").val()); //手机号码
+            var isMobile = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/;
+            var jtel = $(".phone");
+            if (phone != "" && isMobile.test(phone) && phone.length == 11) {
+                //开始计时
+                $("#btnSendCode").attr("disabled", "true");
+                $("#btnSendCode").val("请在" + curCount + "秒内输入验证码");
+                InterValObj = window.setInterval(SetRemainTime, 1000); //启动计时器，1秒执行一次
+
+                //向后台获验证码
+                $.ajax({
+                    url: "https://www.hangchengtech.com/YCGService/APIV1.php/Sys/getVerify",
+                    type: "POST",
+                    //dataType: "text",
+                    // data: "phones=" + phone + "&code=" + code,
+                    dataType: "JSON",
+                    data: {
+                        tel: phone,
+                        type: "1"
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        console.log(data.resultCode);
+                        console.log(data.message);
+                        console.log(data.key);
+                    }
+                });
+            } else {
+                $('.tel-msg').text('请输入有效的手机号码');
+            }
+        });
+
+        //timer处理函数
+        function SetRemainTime() {
+            if (curCount == 0) {
+                window.clearInterval(InterValObj); //停止计时器
+                $("#btnSendCode").removeAttr("disabled"); //启用按钮
+                $("#btnSendCode").val("重新发送验证码");
+                code = ""; //清除验证码。如果不清除，过时间后，输入收到的验证码依然有效
+            } else {
+                curCount--;
+                $("#btnSendCode").val("请在" + curCount + "秒内输入验证码");
+            }
+        }
+
+    })
+</script>
+</body>
+
+</html>
