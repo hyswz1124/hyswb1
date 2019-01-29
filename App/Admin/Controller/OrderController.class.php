@@ -59,7 +59,7 @@ class OrderController extends CommonController {
         ];
         $page = I('page',1,'int');
         $limit = min(30, I('limit',10,'int'));
-        $data = M('trades a')->field('b.nickname,b.mphone,b.email,c.id,c.order_no,c.eth,c.token,c.create_time')->join('yt_users b on b.id = a.user_id')->join('yt_orders c on a.order_no = c.order_no')->where($listwhere)->limit($limit*($page-1), $limit)->order("c.id desc")->select();
+        $data = M('trades a')->field('b.nickname,b.mphone,b.email,b.eth_address,c.id,c.order_no,c.eth,c.token,c.create_time')->join('yt_users b on b.id = a.user_id')->join('yt_orders c on a.order_no = c.order_no')->where($listwhere)->limit($limit*($page-1), $limit)->order("c.id desc")->select();
         $count = M('trades a')->field('b.nickname,b.mphone,b.email,c.order_no,c.eth,c.token,c.create_time')->join('yt_users b on b.id = a.user_id')->join('yt_orders c on a.order_no = c.order_no')->where($listwhere)->count();
         api_json(array('trend'=>$retuen,'res'=>$data,'count'=>empty($count)?0:$count),'200','获取数据成功');
     }
